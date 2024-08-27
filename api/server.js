@@ -2,6 +2,9 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 
+const clientRoutes = require('../routes/clientRouter');
+const messageRoutes = require('../routes/messageRouter');
+
 const server = express();
 
 server.use(cors());
@@ -12,5 +15,7 @@ server.get('/', (req, res) => {
     res.send('Hello World!');
 })
 
+server.use('/client', clientRoutes);
+server.use('/message', messageRoutes);
 
 module.exports = server;

@@ -3,16 +3,17 @@ const router = express.Router();
 const {validateClientData, checkClientExists} = require("../middlewares/clientMiddleware");
 const {addClient, getClients, getClientById, deleteClient, updateClient} = require('../services/clientService');
 
-router.get('/clients', async (req, res) => {
+router.post('/', validateClientData, async (req, res) => {
+    const { phone_number, name, type_id, check_in_date, check_out_date } = req.validatedData;
     try {
-        const clients = await getClients();
-        res.status(200).json(clients);
+        const result = await addClient(phone_number, name, type_id, check_in_date, check_out_date);
+        res.status(201).json({ status: 'Client added successfully', id: result.id });
     } catch (err) {
-        res.status(500).json({ status: 'Failed to retrieve clients', error: err.message });
+        res.status(500).json({ status: 'Failed to add client', error: err.message });
     }
 });
 
-router.get('/client/:id', async (req, res) => {
+router.get('/:id', async (req, res) => {
     const { id } = req.params;
     try {
         const client = await getClientById(id);
@@ -26,17 +27,7 @@ router.get('/client/:id', async (req, res) => {
     }
 });
 
-router.post('/client', validateClientData, async (req, res) => {
-    const { phone_number, name, type_id, check_in_date, check_out_date } = req.validatedData;
-    try {
-        const result = await addClient(phone_number, name, type_id, check_in_date, check_out_date);
-        res.status(201).json({ status: 'Client added successfully', id: result.id });
-    } catch (err) {
-        res.status(500).json({ status: 'Failed to add client', error: err.message });
-    }
-});
-
-router.put('/client/:id', checkClientExists, validateClientData, async (req, res) => {
+router.put('/:id', checkClientExists, validateClientData, async (req, res) => {
     const { id } = req.params;
     const { phone_number, name, type_id, check_in_date, check_out_date } = req.validatedData;
     try {
@@ -47,13 +38,22 @@ router.put('/client/:id', checkClientExists, validateClientData, async (req, res
     }
 });
 
-router.delete('/client/:id', checkClientExists, async (req, res) => {
+router.delete('/:id', checkClientExists, async (req, res) => {
     const { id } = req.params;
     try {
         const result = await deleteClient(id);
         res.status(200).json({ status: 'Client deleted successfully', client: result });
     } catch (err) {
         res.status(500).json({ status: 'Failed to delete client', error: err.message });
+    }
+});
+
+router.get('/all', async (req, res) => {
+    try {
+        const clients = await getClients();
+        res.status(200).json(clients);
+    } catch (err) {
+        res.status(500).json({ status: 'Failed to retrieve clients', error: err.message });
     }
 });
 
