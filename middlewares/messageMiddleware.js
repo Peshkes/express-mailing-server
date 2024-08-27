@@ -1,4 +1,5 @@
 const {validateSendingDate, validateMessageText, validateRecipientTypeId, validateVideoPath, validateImagePath, validateMessageExists} = require('../validators/messageValidator');
+const {validateClientType} = require('../validators/clientValidator');
 
 function validateMessageData(req, res, next) {
     const {message_text, recipient_type_id, video_path, image_path, sending_date} = req.body;
@@ -42,6 +43,19 @@ async function checkMessageExists(req, res, next) {
         next();
     } catch (err) {
         return res.status(500).json({ status: 'Failed to validate message exists', error: err.message });
+    }
+}
+
+async function checkTypeExists(req, res, next) {
+    const { id } = req.params;
+    try {
+        const typeValidation = await validateClientType(id);
+        if (!typeValidation.valid) {
+            return res.status(400).json({ status: typeValidation.message });
+        }
+        next();
+    } catch (err) {
+        return res.status(500).json({ status: 'Failed to validate client type exists', error: err.message });
     }
 }
 
