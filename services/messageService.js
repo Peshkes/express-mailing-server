@@ -17,7 +17,7 @@ async function addMessage(message_text, recipient_type_id, video_path, image_pat
                 recipient_type_id,
                 video_path,
                 image_path,
-                sending_date // Прямое использование long timestamp
+                sending_date
             })
             .returning('id');
         return { id: result };
@@ -96,10 +96,42 @@ async function deleteMessage(id) {
     }
 }
 
+/**
+ * Ищет сообщения по части текста.
+ * @param {string} text - Часть текста для поиска.
+ * @returns {Promise<Array>} - Массив сообщений, соответствующих запросу.
+ */
+async function searchMessagesByText(text) {
+    try {
+        return await db('messages')
+            .where('message_text', 'like', `%${text}%`)
+            .select('*');
+    } catch (err) {
+        throw new Error(`Failed to search messages by text: ${err.message}`);
+    }
+}
+
+/**
+ * Получает сообщения по ID типа получателя.
+ * @param {number} recipient_type_id - ID типа получателя.
+ * @returns {Promise<Array>} - Массив сообщений для данного типа получателя.
+ */
+async function getMessagesByRecipientType(recipient_type_id) {
+    try {
+        return await db('messages')
+            .where({ recipient_type_id })
+            .select('*');
+    } catch (err) {
+        throw new Error(`Failed to retrieve messages by recipient type: ${err.message}`);
+    }
+}
+
 module.exports = {
     addMessage,
     getMessages,
     getMessageById,
     updateMessage,
-    deleteMessage
+    deleteMessage,
+    searchMessagesByText,
+    getMessagesByRecipientType
 };
