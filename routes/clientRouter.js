@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {validateClientData, checkClientExists, checkMessangerExists} = require("../middlewares/clientMiddleware");
-const {addClient, getClients, getClientById, deleteClient, updateClient} = require('../services/clientService');
+const {addClient, getClients, getClientById, deleteClient, updateClient, updateClientsMessanger} = require('../services/clientService');
 
 router.post('/', validateClientData, async (req, res) => {
     const { phone_number, name, type_id, check_in_date, check_out_date, messanger_id } = req.validatedData;

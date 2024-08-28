@@ -147,5 +147,6 @@ module.exports = {
     getClients,
     getClientById,
     updateClient,
-    deleteClient
+    deleteClient,
+    updateClientsMessanger
 };
