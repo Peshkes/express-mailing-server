@@ -7,15 +7,17 @@ const db = require("../api/db/dbConfig");
  * @param {number} type_id - ID типа клиента.
  * @param {number} check_in_date - Дата заезда в формате long timestamp.
  * @param {number} check_out_date - Дата выезда в формате long timestamp.
+ * @param {number} messanger_id - ID мессенджера.
  * @returns {Promise<Object>} - Объект с ID добавленного клиента.
  */
-async function addClient(phone_number, name, type_id, check_in_date, check_out_date) {
+async function addClient(phone_number, name, type_id, check_in_date, check_out_date, messanger_id) {
     try {
         const [result] = await db('clients')
             .insert({
                 phone_number,
                 name,
                 type_id,
+                messanger_id,
                 check_in_date,
                 check_out_date
             })
@@ -64,9 +66,10 @@ async function getClientById(clientId) {
  * @param {number} type_id - ID типа клиента.
  * @param {number} check_in_date - Дата заезда в формате long timestamp.
  * @param {number} check_out_date - Дата выезда в формате long timestamp.
+ * @param {number} messanger_id - ID мессенджера.
  * @returns {Promise<Object>} - Объект с ID обновленного клиента.
  */
-async function updateClient(id, phone_number, name, type_id, check_in_date, check_out_date) {
+async function updateClient(id, phone_number, name, type_id, check_in_date, check_out_date, messanger_id) {
     try {
         const [result] = await db('clients')
             .where({ id })
@@ -74,6 +77,7 @@ async function updateClient(id, phone_number, name, type_id, check_in_date, chec
                 phone_number,
                 name,
                 type_id,
+                messanger_id,
                 check_in_date,
                 check_out_date
             })
@@ -83,6 +87,29 @@ async function updateClient(id, phone_number, name, type_id, check_in_date, chec
             throw new Error('Client not found');
         }
 
+        return { id: result };
+    } catch (err) {
+        throw new Error(`Failed to update client: ${err.message}`);
+    }
+}
+
+/**
+ * Обновляет ID мессенджера у клиента в базе данных.
+ * @param {number} id - ID клиента.
+ * @param {number} messanger_id - ID мессенджера.
+ * @returns {Promise<Object>} - Объект с ID обновленного клиента.
+ */
+async function updateClientsMessanger(id, messanger_id) {
+    try {
+        const [result] = await db('clients')
+            .where({ id })
+            .update({
+                messanger_id
+            })
+            .returning('id');
+        if (!result) {
+            throw new Error('Client not found');
+        }
         return { id: result };
     } catch (err) {
         throw new Error(`Failed to update client: ${err.message}`);

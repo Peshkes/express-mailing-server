@@ -1,7 +1,7 @@
-const { validateTimestamps, validatePhoneNumber, validateClientType, validateClientExists } = require("../validators/clientValidator");
+const { validateTimestamps, validatePhoneNumber, validateClientType, validateClientExists, validateMessanger } = require("../validators/clientValidator");
 
 async function validateClientData(req, res, next) {
-    const { phone_number, name, type_id, check_in_date, check_out_date } = req.body;
+    const { phone_number, name, type_id, check_in_date, check_out_date, messanger_id } = req.body;
 
     if (!phone_number || !name || !type_id || !check_in_date || !check_out_date) {
         return res.status(400).json({ status: 'Missing required fields' });
@@ -22,12 +22,20 @@ async function validateClientData(req, res, next) {
             return res.status(400).json({ status: clientTypeValidation.message });
         }
 
+        if (messanger_id) {
+            const messangerValidation = await validateMessanger(messanger_id);
+            if (!messangerValidation.valid) {
+                return res.status(400).json({ status: messangerValidation.message });
+            }
+        }
+
         req.validatedData = {
             phone_number,
             name,
             type_id,
             check_in_date,
             check_out_date,
+            messanger_id
         };
 
         next();
@@ -49,7 +57,21 @@ async function checkClientExists(req, res, next) {
     }
 }
 
+async function checkMessangerExists(req, res, next) {
+    const { messanger_id } = req.params;
+    try {
+        const messangerValidation = await validateMessanger(messanger_id);
+        if (!messangerValidation.valid) {
+            return res.status(400).json({ status: messangerValidation.message });
+        }
+        next();
+    } catch (err) {
+        return res.status(500).json({ status: 'Failed to validate messanger exists', error: err.message });
+    }
+}
+
 module.exports = {
     validateClientData,
-    checkClientExists
+    checkClientExists,
+    checkMessangerExists
 };
