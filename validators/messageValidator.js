@@ -20,20 +20,11 @@ function validateRecipientTypeId(recipient_type_id) {
 
 /**
  * Проверяет корректность ссылки на видео.
- * @param {string} video_path - Ссылка на видео.
+ * @param {string} media_path - Ссылка на видео.
  * @returns {boolean} - Корректность ссылки.
  */
-function validateVideoPath(video_path) {
-    return video_path === undefined || (typeof video_path === 'string' && video_path.trim().length > 0);
-}
-
-/**
- * Проверяет корректность ссылки на изображение.
- * @param {string} image_path - Ссылка на изображение.
- * @returns {boolean} - Корректность ссылки.
- */
-function validateImagePath(image_path) {
-    return image_path === undefined || (typeof image_path === 'string' && image_path.trim().length > 0);
+function validateMediaPath(media_path) {
+    return media_path === undefined || (typeof media_path === 'string' && media_path.trim().length > 0);
 }
 
 /**
@@ -59,7 +50,6 @@ module.exports = {
     validateSendingDate,
     validateMessageText,
     validateRecipientTypeId,
-    validateVideoPath,
-    validateImagePath,
+    validateMediaPath,
     validateMessageExists
 };

@@ -1,14 +1,14 @@
 const express = require('express');
 const router = express.Router();
-const {validateMessageData, checkMessageExists} = require("../middlewares/messageMiddleware");
+const {validateMessageData, checkMessageExists, checkClientTypeExists} = require("../middlewares/messageMiddleware");
 
 const {addMessage, getMessages, getMessageById, updateMessage, deleteMessage, searchMessagesByText, getMessagesByRecipientType} = require('../services/messageService');
 const {sendDelayedMessageNow, sendMessageImmediately} = require('../services/sendingService');
 
 router.post('/', validateMessageData, async (req, res) => {
-    const {message_text, recipient_type_id, video_path, image_path, sending_date} = req.validatedData;
+    const {message_text, recipient_type_id, media_path, sending_date} = req.validatedData;
     try {
-        const result = await addMessage(message_text, recipient_type_id, video_path, image_path, sending_date);
+        const result = await addMessage(message_text, recipient_type_id, media_path, sending_date);
         res.status(201).json({status: 'Message added successfully', id: result.id});
     } catch (err) {
         res.status(500).json({status: 'Failed to add message', error: err.message});
@@ -31,9 +31,9 @@ router.get('/:id', async (req, res) => {
 
 router.put('/:id', checkMessageExists, validateMessageData, async (req, res) => {
     const {id} = req.params;
-    const {message_text, recipient_type_id, video_path, image_path, sending_date} = req.validatedData;
+    const {message_text, recipient_type_id, media_path, sending_date} = req.validatedData;
     try {
-        const message = await updateMessage(id, message_text, recipient_type_id, video_path, image_path, sending_date);
+        const message = await updateMessage(id, message_text, recipient_type_id, media_path, sending_date);
         res.status(200).json({status: 'Message updated successfully', message});
     } catch (err) {
         res.status(500).json({status: 'Failed to update message', error: err.message});
@@ -80,16 +80,16 @@ router.get('/all/search', async (req, res) => {
 });
 
 router.post('/send-now', validateMessageData, async (req, res) => {
-    const {message_text, recipient_type_id, video_path, image_path, sending_date} = req.validatedData;
+    const {message_text, recipient_type_id, media_path, sending_date} = req.validatedData;
     try {
-        const result = await sendMessageImmediately(message_text, recipient_type_id, video_path, image_path, sending_date);
+        const result = await sendMessageImmediately(message_text, recipient_type_id, media_path, sending_date);
         res.status(200).json({status: 'Message sent immediately', result});
     } catch (err) {
         res.status(500).json({status: 'Failed to send message immediately', error: err.message});
     }
 });
 
-router.get('/all/recipient-type/:id', async (req, res) => {
+router.get('/all/recipient-type/:id', checkClientTypeExists, async (req, res) => {
     const { id } = req.params;
     try {
         const messages = await getMessagesByRecipientType(id);

@@ -1,8 +1,10 @@
-const {validateSendingDate, validateMessageText, validateRecipientTypeId, validateVideoPath, validateImagePath, validateMessageExists} = require('../validators/messageValidator');
+const {validateSendingDate, validateMessageText, validateRecipientTypeId, validateVideoPath, validateImagePath, validateMessageExists,
+    validateMediaPath
+} = require('../validators/messageValidator');
 const {validateClientType} = require('../validators/clientValidator');
 
 function validateMessageData(req, res, next) {
-    const {message_text, recipient_type_id, video_path, image_path, sending_date} = req.body;
+    const {message_text, recipient_type_id, media_path, sending_date} = req.body;
 
     const isMessageTextValid = validateMessageText(message_text);
     if (!isMessageTextValid) {
@@ -14,14 +16,9 @@ function validateMessageData(req, res, next) {
         return res.status(400).json({status: 'Invalid recipient type ID'});
     }
 
-    const isVideoPathValid = validateVideoPath(video_path);
-    if (!isVideoPathValid) {
-        return res.status(400).json({status: 'Invalid video path'});
-    }
-
-    const isImagePathValid = validateImagePath(image_path);
-    if (!isImagePathValid) {
-        return res.status(400).json({status: 'Invalid image path'});
+    const isMediaPathValid = validateMediaPath(media_path);
+    if (!isMediaPathValid) {
+        return res.status(400).json({status: 'Invalid media path'});
     }
 
     const isSendingDateValid = validateSendingDate(sending_date);
@@ -29,7 +26,7 @@ function validateMessageData(req, res, next) {
         return res.status(400).json({status: 'Invalid sending date'});
     }
 
-    req.validatedMessageData = {message_text, recipient_type_id, video_path, image_path, sending_date};
+    req.validatedMessageData = {message_text, recipient_type_id, media_path, sending_date};
     next();
 }
 
@@ -46,7 +43,7 @@ async function checkMessageExists(req, res, next) {
     }
 }
 
-async function checkTypeExists(req, res, next) {
+async function checkClientTypeExists(req, res, next) {
     const { id } = req.params;
     try {
         const typeValidation = await validateClientType(id);
@@ -61,5 +58,6 @@ async function checkTypeExists(req, res, next) {
 
 module.exports = {
     validateMessageData,
-    checkMessageExists
+    checkMessageExists,
+    checkClientTypeExists
 };

@@ -4,12 +4,11 @@ const db = require("../api/db/dbConfig");
  * Отправляет сообщение немедленно (без сохранения в базе данных).
  * @param {string} message_text - Текст сообщения.
  * @param {number} recipient_type_id - ID типа получателя.
- * @param {string} video_path - Путь к видео (может быть пустым).
- * @param {string} image_path - Путь к изображению (может быть пустым).
+ * @param {string} media_path - Путь к медиа (может быть пустым).
  * @param {number} sending_date - Дата отправки в формате long timestamp.
  * @returns {Promise<Object>} - Объект с результатом отправки сообщения.
  */
-async function sendMessageImmediately(message_text, recipient_type_id, video_path, image_path, sending_date) {
+async function sendMessageImmediately(message_text, recipient_type_id, media_path, sending_date) {
     // Здесь должна быть логика отправки сообщения немедленно
     // Например, отправка в очередь или напрямую в другой сервис
     try {
