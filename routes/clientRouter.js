@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const {validateClientData, checkClientExists, checkMessangerExists} = require("../middlewares/clientMiddleware");
-const {addClient, getClients, getClientById, deleteClient, updateClient, updateClientsMessanger} = require('../services/clientService');
+const {validateClientData, checkClientExists, checkMessengerExists} = require("../middlewares/clientMiddleware");
+const {addClient, getClients, getClientById, deleteClient, updateClient, updateClientsMessenger} = require('../services/clientService');
 
 router.post('/', validateClientData, async (req, res) => {
     const { phone_number, name, type_id, check_in_date, check_out_date, messanger_id } = req.validatedData;
@@ -48,10 +48,10 @@ router.delete('/:id', checkClientExists, async (req, res) => {
     }
 });
 
-router.put('/:id/:messanger_id', checkClientExists, checkMessangerExists, async (req, res) => {
-    const { id, messanger_id } = req.params;
+router.put('/:id/:messanger_id', checkClientExists, checkMessengerExists, async (req, res) => {
+    const { id, messenger_id } = req.params;
     try {
-        const result = await updateClientsMessanger(id, messanger_id);
+        const result = await updateClientsMessenger(id, messenger_id);
         res.status(200).json({ status: 'Client updated successfully', id: result.id });
     } catch (err) {
         res.status(500).json({ status: 'Failed to update client', error: err.message });

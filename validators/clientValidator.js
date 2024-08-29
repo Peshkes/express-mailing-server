@@ -40,12 +40,12 @@ async function validateClientType(type_id) {
 
 /**
  * Проверяет существование типа клиента по его ID.
- * @param {number} messanger_id - ID типа клиента.
+ * @param {number} messenger_id - ID типа клиента.
  * @returns {Promise<Object>} - Результат проверки. Включает флаг `valid` и сообщение об ошибке при необходимости.
  */
-async function validateMessanger(messanger_id) {
-    const messanger = await db('messangers').where({ id: messanger_id }).first();
-    return messanger ? { valid: true } : { valid: false, message: 'Invalid messanger' };
+async function validateMessenger(messenger_id) {
+    const messenger = await db('messengers').where({ id: messenger_id }).first();
+    return messenger ? { valid: true } : { valid: false, message: 'Invalid messanger' };
 }
 
 /**
@@ -63,5 +63,5 @@ module.exports = {
     validateTimestamps,
     validateClientType,
     validateClientExists,
-    validateMessanger
+    validateMessenger
 };

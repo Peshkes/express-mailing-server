@@ -1,4 +1,4 @@
-const { validateTimestamps, validatePhoneNumber, validateClientType, validateClientExists, validateMessanger } = require("../validators/clientValidator");
+const { validateTimestamps, validatePhoneNumber, validateClientType, validateClientExists, validateMessenger } = require("../validators/clientValidator");
 
 async function validateClientData(req, res, next) {
     const { phone_number, name, type_id, check_in_date, check_out_date, messanger_id } = req.body;
@@ -57,21 +57,21 @@ async function checkClientExists(req, res, next) {
     }
 }
 
-async function checkMessangerExists(req, res, next) {
-    const { messanger_id } = req.params;
+async function checkMessengerExists(req, res, next) {
+    const { messenger_id } = req.params;
     try {
-        const messangerValidation = await validateMessanger(messanger_id);
-        if (!messangerValidation.valid) {
-            return res.status(400).json({ status: messangerValidation.message });
+        const messengerValidation = await validateMessenger(messenger_id);
+        if (!messengerValidation.valid) {
+            return res.status(400).json({ status: messengerValidation.message });
         }
         next();
     } catch (err) {
-        return res.status(500).json({ status: 'Failed to validate messanger exists', error: err.message });
+        return res.status(500).json({ status: 'Failed to validate messenger exists', error: err.message });
     }
 }
 
 module.exports = {
     validateClientData,
     checkClientExists,
-    checkMessangerExists
+    checkMessengerExists
 };

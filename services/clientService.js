@@ -7,17 +7,17 @@ const db = require("../api/db/dbConfig");
  * @param {number} type_id - ID типа клиента.
  * @param {number} check_in_date - Дата заезда в формате long timestamp.
  * @param {number} check_out_date - Дата выезда в формате long timestamp.
- * @param {number} messanger_id - ID мессенджера.
+ * @param {number} messenger_id - ID мессенджера.
  * @returns {Promise<Object>} - Объект с ID добавленного клиента.
  */
-async function addClient(phone_number, name, type_id, check_in_date, check_out_date, messanger_id) {
+async function addClient(phone_number, name, type_id, check_in_date, check_out_date, messenger_id) {
     try {
         const [result] = await db('clients')
             .insert({
                 phone_number,
                 name,
                 type_id,
-                messanger_id,
+                messenger_id,
                 check_in_date,
                 check_out_date
             })
@@ -96,15 +96,15 @@ async function updateClient(id, phone_number, name, type_id, check_in_date, chec
 /**
  * Обновляет ID мессенджера у клиента в базе данных.
  * @param {number} id - ID клиента.
- * @param {number} messanger_id - ID мессенджера.
+ * @param {number} messenger_id - ID мессенджера.
  * @returns {Promise<Object>} - Объект с ID обновленного клиента.
  */
-async function updateClientsMessanger(id, messanger_id) {
+async function updateClientsMessenger(id, messenger_id) {
     try {
         const [result] = await db('clients')
             .where({ id })
             .update({
-                messanger_id
+                messenger_id
             })
             .returning('id');
         if (!result) {
@@ -148,5 +148,5 @@ module.exports = {
     getClientById,
     updateClient,
     deleteClient,
-    updateClientsMessanger
+    updateClientsMessenger
 };
