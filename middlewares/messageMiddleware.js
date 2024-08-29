@@ -1,4 +1,4 @@
-const {validateSendingDate, validateMessageText, validateRecipientTypeId, validateVideoPath, validateImagePath, validateMessageExists,
+const {validateSendingDate, validateMessageText, validateRecipientTypeId, validateMessageExists,
     validateMediaPath
 } = require('../validators/messageValidator');
 const {validateClientType} = require('../validators/clientValidator');
