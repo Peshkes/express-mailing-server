@@ -180,6 +180,13 @@ async function getClientsWithPaginationAndFilter({page, limit, type}) {
     }
 }
 
+/**
+ * Ищет клиентов по заданной строке и указанным полям поиска.
+ * @param {string} string - Строка для поиска.
+ * @param {string[]} searchFields - Массив полей для поиска (например, ['phone', 'name']).
+ * @returns {Promise<Object[]>} - Массив клиентов, соответствующих критериям поиска.
+ * @throws {Error} - В случае ошибки поиска.
+ */
 async function searchClients(string, searchFields) {
     try {
         let query = db('clients');
@@ -204,13 +211,58 @@ async function searchClients(string, searchFields) {
     }
 }
 
+/**
+ * Получает последние добавленные клиенты в заданном количестве.
+ * @param {number} count - Количество клиентов, которые нужно вернуть.
+ * @returns {Promise<Object[]>} - Массив клиентов, отсортированных по убыванию ID.
+ * @throws {Error} - В случае ошибки при получении клиентов.
+ */
+async function getLastAddedClients(count) {
+    try {
+        return await db('clients')
+            .orderBy('id', 'desc')
+            .limit(count)
+            .select('*');
+    } catch (err) {
+        throw new Error(`Failed to retrieve clients: ${err.message}`);
+    }
+}
+
+/**
+ * Получает клиентов, у которых возникла ошибка при работе с Telegram.
+ * @returns {Promise<Object[]>} - Массив клиентов с ошибками в Telegram (messenger_id = 2 и chat_id = 0).
+ * @throws {Error} - В случае ошибки при получении клиентов.
+ */
+async function getClientsWithTelegramError() {
+    try {
+        return await db('clients')
+            .where('messenger_id', 2)
+            .where('chat_id', 0)
+            .select('*');
+    } catch (err) {
+        throw new Error(`Failed to retrieve clients: ${err.message}`);
+    }
+}
+
+/**
+ * Получает клиентов без указанного типа.
+ * @returns {Promise<Object[]>} - Массив клиентов, у которых не указан тип (type = null).
+ * @throws {Error} - В случае ошибки при получении клиентов.
+ */
+async function getClientsWithoutTypes() {
+    try {
+        return await db('clients')
+            .whereNull('type')
+            .select('*');
+    } catch (err) {
+        throw new Error(`Failed to retrieve clients: ${err.message}`);
+    }
+}
+
+
+
 module.exports = {
-    addClient,
-    getClients,
-    getClientById,
-    updateClient,
-    deleteClient,
-    updateClientsMessenger,
-    getClientsWithPaginationAndFilter,
-    searchClients
+    addClient, getClients, getClientById, updateClient, deleteClient,
+    updateClientsMessenger, getClientsWithPaginationAndFilter,
+    searchClients, getLastAddedClients, getClientsWithTelegramError, getClientsWithoutTypes
 };
