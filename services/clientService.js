@@ -23,7 +23,7 @@ async function addClient(phone_number, name, type_id, check_in_date, check_out_d
             })
             .returning('id');
 
-        return { id: result };
+        return {id: result};
     } catch (err) {
         throw new Error(`Failed to add client: ${err.message}`);
     }
@@ -48,7 +48,7 @@ async function getClients() {
  */
 async function getClientById(clientId) {
     try {
-        const client = await db('clients').where({ id: clientId }).first();
+        const client = await db('clients').where({id: clientId}).first();
         if (!client) {
             throw new Error('Client not found');
         }
@@ -72,7 +72,7 @@ async function getClientById(clientId) {
 async function updateClient(id, phone_number, name, type_id, check_in_date, check_out_date, messanger_id) {
     try {
         const [result] = await db('clients')
-            .where({ id })
+            .where({id})
             .update({
                 phone_number,
                 name,
@@ -87,7 +87,7 @@ async function updateClient(id, phone_number, name, type_id, check_in_date, chec
             throw new Error('Client not found');
         }
 
-        return { id: result };
+        return {id: result};
     } catch (err) {
         throw new Error(`Failed to update client: ${err.message}`);
     }
@@ -102,7 +102,7 @@ async function updateClient(id, phone_number, name, type_id, check_in_date, chec
 async function updateClientsMessenger(id, messenger_id) {
     try {
         const [result] = await db('clients')
-            .where({ id })
+            .where({id})
             .update({
                 messenger_id
             })
@@ -110,7 +110,7 @@ async function updateClientsMessenger(id, messenger_id) {
         if (!result) {
             throw new Error('Client not found');
         }
-        return { id: result };
+        return {id: result};
     } catch (err) {
         throw new Error(`Failed to update client: ${err.message}`);
     }
@@ -124,7 +124,7 @@ async function updateClientsMessenger(id, messenger_id) {
 async function deleteClient(id) {
     try {
         const client = await db('clients')
-            .where({ id })
+            .where({id})
             .first();
 
         if (!client) {
@@ -132,7 +132,7 @@ async function deleteClient(id) {
         }
 
         await db('clients')
-            .where({ id })
+            .where({id})
             .del();
 
         return client;
@@ -141,6 +141,68 @@ async function deleteClient(id) {
     }
 }
 
+/**
+ * Получает список клиентов с учетом пагинации и фильтрации по типу клиента.
+ * @param {Object} options - Опции запроса.
+ * @param {number} options.page - Номер страницы.
+ * @param {number} options.limit - Количество клиентов на странице.
+ * @param {string} [options.type] - Тип клиента для фильтрации (опционально).
+ * @returns {Promise<Object>} - Объект с массивом клиентов и общим количеством страниц.
+ */
+async function getClientsWithPaginationAndFilter({page, limit, type}) {
+    try {
+        let query = db('clients');
+
+        if (type) {
+            query = query.where('type', type);
+        }
+
+        const offset = (page - 1) * limit;
+
+        const [clients, total] = await Promise.all([
+            query.clone().select('*').limit(limit).offset(offset),
+            query.clone().count('* as total').first()
+        ]);
+
+        const totalPages = Math.ceil(total.total / limit);
+
+        return {
+            data: clients,
+            pagination: {
+                total: total.total,
+                page,
+                totalPages,
+                limit,
+            },
+        };
+    } catch (err) {
+        throw new Error(`Failed to retrieve clients: ${err.message}`);
+    }
+}
+
+async function searchClients(string, searchFields) {
+    try {
+        let query = db('clients');
+
+        if (searchFields.includes('phone') && searchFields.includes('name')) {
+            query = query.where(function () {
+                this.where('phone_number', 'like', `%${string}%`)
+                    .orWhere('name', 'like', `%${string}%`);
+            });
+        } else if (searchFields.includes('phone')) {
+            query = query.where('phone_number', 'like', `%${string}%`);
+        } else if (searchFields.includes('name')) {
+            query = query.where('name', 'like', `%${string}%`);
+        } else {
+            throw new Error('Некорректные поля поиска');
+        }
+
+        return await query.select('*');
+    } catch (error) {
+        console.error('Ошибка при поиске клиентов:', error);
+        throw error;
+    }
+}
 
 module.exports = {
     addClient,
@@ -148,5 +210,7 @@ module.exports = {
     getClientById,
     updateClient,
     deleteClient,
-    updateClientsMessenger
+    updateClientsMessenger,
+    getClientsWithPaginationAndFilter,
+    searchClients
 };

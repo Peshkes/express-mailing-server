@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {validateClientData, checkClientExists, checkMessengerExists} = require("../middlewares/clientMiddleware");
-const {addClient, getClients, getClientById, deleteClient, updateClient, updateClientsMessenger} = require('../services/clientService');
+const {addClient, getClients, getClientById, deleteClient, updateClient, updateClientsMessenger, getClientsWithPaginationAndFilter, searchClients} = require('../services/clientService');
 
 router.post('/', validateClientData, async (req, res) => {
     const { phone_number, name, type_id, check_in_date, check_out_date, messanger_id } = req.validatedData;
@@ -49,9 +49,9 @@ router.delete('/:id', checkClientExists, async (req, res) => {
 });
 
 router.put('/:id/:messanger_id', checkClientExists, checkMessengerExists, async (req, res) => {
-    const { id, messenger_id } = req.params;
+    const { id, messanger_id } = req.params;
     try {
-        const result = await updateClientsMessenger(id, messenger_id);
+        const result = await updateClientsMessenger(id, messanger_id);
         res.status(200).json({ status: 'Client updated successfully', id: result.id });
     } catch (err) {
         res.status(500).json({ status: 'Failed to update client', error: err.message });
@@ -64,6 +64,37 @@ router.get('/all', async (req, res) => {
         res.status(200).json(clients);
     } catch (err) {
         res.status(500).json({ status: 'Failed to retrieve clients', error: err.message });
+    }
+});
+
+router.get('/all/paginated', async (req, res) => {
+    const { page = 1, limit = 10, type } = req.query;
+    try {
+        const clients = await getClientsWithPaginationAndFilter({ page, limit, type });
+        res.status(200).json(clients);
+    } catch (err) {
+        res.status(500).json({ status: 'Failed to retrieve clients', error: err.message });
+    }
+});
+
+router.get('/all/last/:count', async (req, res) => {
+    const { count } = req.params;
+    try {
+        const clients = await getLastAddedClients(count);
+        res.status(200).json(clients);
+    } catch (err) {
+        res.status(500).json({ status: 'Failed to retrieve clients', error: err.message });
+    }
+});
+
+router.get('/all/search/:string', async (req, res) => {
+    const { string } = req.params;
+    const searchFields = req.query.fields ? req.query.fields.split(',') : [];
+    try {
+        const result = await searchClients(string, searchFields);
+        res.status(200).json({ status: 'Client search completed', result: result });
+    } catch (err) {
+        res.status(500).json({ status: 'Failed to search client', error: err.message });
     }
 });
 
