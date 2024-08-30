@@ -93,17 +93,70 @@ async function deleteMessage(id) {
 }
 
 /**
- * Ищет сообщения по части текста.
- * @param {string} text - Часть текста для поиска.
- * @returns {Promise<Array>} - Массив сообщений, соответствующих запросу.
+ * Получает список сообщений с учетом пагинации и фильтрации по типу получателя.
+ * @param {Object} options - Опции запроса.
+ * @param {number} options.page - Номер страницы.
+ * @param {number} options.limit - Количество сообщений на странице.
+ * @param {string} [options.type] - Тип получателя для фильтрации (опционально).
+ * @returns {Promise<Object>} - Объект с массивом сообщений и общим количеством страниц.
  */
-async function searchMessagesByText(text) {
+async function getMessagesWithPaginationAndFilter({ page, limit, type }) {
     try {
-        return await db('messages')
-            .where('message_text', 'like', `%${text}%`)
-            .select('*');
+        let query = db('messages');
+
+        if (type) {
+            query = query
+                .join('client_types', 'messages.recipient_type_id', 'client_types.id')
+                .where('client_types.type_name', type);
+        }
+
+        const offset = (page - 1) * limit;
+
+        const [messages, total] = await Promise.all([
+            query.clone().select('*').limit(limit).offset(offset),
+            query.clone().count('* as total').first()
+        ]);
+
+        const totalPages = Math.ceil(total.total / limit);
+
+        return {
+            data: messages,
+            pagination: {
+                total: total.total,
+                page,
+                totalPages,
+                limit,
+            },
+        };
     } catch (err) {
-        throw new Error(`Failed to search messages by text: ${err.message}`);
+        throw new Error(`Failed to retrieve messages: ${err.message}`);
+    }
+}
+
+/**
+ * Ищет сообщения по части текста и/или диапазону дат.
+ * @param {string} [text] - Часть текста для поиска (опционально).
+ * @param {number} [date_from] - Дата начала диапазона для поиска (опционально, в формате long timestamp).
+ * @param {number} [date_to] - Дата окончания диапазона для поиска (опционально, в формате long timestamp).
+ * @returns {Promise<Array>} - Массив сообщений, соответствующих запросу.
+ * @throws {Error} - В случае ошибки при поиске сообщений.
+ */
+async function searchMessages(text, date_from, date_to) {
+    try {
+        let query = db('messages');
+
+        if (text)
+            query = query.where('message_text', 'like', `%${text}%`);
+
+        if (date_from)
+            query = query.where('sent_date', '>=', date_from);
+
+        if (date_to)
+            query = query.where('sent_date', '<=', date_to);
+
+        return await query.select('*');
+    } catch (err) {
+        throw new Error(`Failed to search messages: ${err.message}`);
     }
 }
 
@@ -122,12 +175,28 @@ async function getMessagesByRecipientType(recipient_type_id) {
     }
 }
 
+/**
+ * Получает ближайшие N рассылок, которые будут отправлены в ближайшее время.
+ * @param {number} count - Количество рассылок для получения.
+ * @returns {Promise<Array>} - Массив ближайших рассылок.
+ * @throws {Error} - В случае ошибки при получении рассылок.
+ */
+async function getUpcomingMailings(count) {
+    try {
+        const now = Date.now(); // Получаем текущее время в формате long timestamp
+
+        return await db('messages')
+            .where('sending_date', '>', now)
+            .orderBy('sending_date', 'asc')
+            .limit(count)
+            .select('*');
+    } catch (err) {
+        throw new Error(`Failed to retrieve upcoming mailings: ${err.message}`);
+    }
+}
+
 module.exports = {
-    addMessage,
-    getMessages,
-    getMessageById,
-    updateMessage,
-    deleteMessage,
-    searchMessagesByText,
-    getMessagesByRecipientType
+    addMessage, getMessages, getMessageById, updateMessage, deleteMessage,
+    searchMessages, getMessagesByRecipientType, getMessagesWithPaginationAndFilter,
+    getUpcomingMailings
 };
