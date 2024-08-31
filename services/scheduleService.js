@@ -15,7 +15,7 @@ async function getScheduledMessages() {
 async function sendScheduledMessages() {
     try {
         const message = await getScheduledMessages();
-        await sendMessageImmediately(message.message_text, message.recipient_type_id, message.media_path);
+        return await sendMessageImmediately(message.message_text, message.recipient_type_id, message.media_path);
     } catch (err) {
         console.error(`Failed to send scheduled messages: ${err.message}`);
     }
@@ -23,5 +23,6 @@ async function sendScheduledMessages() {
 
 cron.schedule('* * * * *', async () => {
     console.log('Checking for scheduled messages...');
-    await sendScheduledMessages();
+    const result = await sendScheduledMessages();
+    console.log(result);
 });

@@ -4,7 +4,7 @@ const { validateMessageData, checkMessageExists, checkClientTypeExists, checkNam
 const { addMessage, getMessages, getMessageById, updateMessage, deleteMessage,
     searchMessages, getMessagesByRecipientType, getMessagesWithPaginationAndFilter,
     getUpcomingMailings } = require('../services/messageService');
-const {getSample, addSample, getSamples} = require('services/sampleMessageService');
+const {getSample, addSample, getSamples} = require('../services/sampleMessageService');
 const { sendDelayedMessageNow, sendMessageImmediately } = require('../services/sendingService');
 
 router.post('/', validateMessageData, async (req, res) => {

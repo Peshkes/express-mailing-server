@@ -2,6 +2,8 @@ const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 
+require('./telegramBot/botConfig');
+
 const clientRoutes = require('../routes/clientRouter');
 const messageRoutes = require('../routes/messageRouter');
 

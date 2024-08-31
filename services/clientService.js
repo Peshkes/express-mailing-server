@@ -59,6 +59,23 @@ async function getClientById(clientId) {
 }
 
 /**
+ * Получает клиента по ID из базы данных.
+ * @param {number} typeId - ID типа.
+ * @returns {Promise<Object>} - Объект клиента.
+ */
+async function getClientsByTypeId(typeId) {
+    try {
+        const client = await db('clients').where({type_id: typeId}).first();
+        if (!client) {
+            throw new Error('Client not found');
+        }
+        return client;
+    } catch (err) {
+        throw new Error(`Failed to retrieve client: ${err.message}`);
+    }
+}
+
+/**
  * Обновляет информацию о клиенте в базе данных.
  * @param {number} id - ID клиента.
  * @param {string} phone_number - Номер телефона клиента.
@@ -262,7 +279,7 @@ async function getClientsWithoutTypes() {
 
 
 module.exports = {
-    addClient, getClients, getClientById, updateClient, deleteClient,
+    addClient, getClients, getClientById, updateClient, deleteClient, getClientsByTypeId,
     updateClientsMessenger, getClientsWithPaginationAndFilter,
     searchClients, getLastAddedClients, getClientsWithTelegramError, getClientsWithoutTypes
 };

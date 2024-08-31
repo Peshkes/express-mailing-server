@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {validateClientData, checkClientExists, checkMessengerExists} = require("../middlewares/clientMiddleware");
-const {addClient, getClients, getClientById, deleteClient, updateClient, updateClientsMessenger, getClientsWithPaginationAndFilter, searchClients, getLastAddedClients, getClientsWithTelegramError, getClientsWithoutTypes} = require('../services/clientService');
+const {addClient, getClients, getClientById, deleteClient, updateClient, updateClientsMessenger, getClientsWithPaginationAndFilter, searchClients, getLastAddedClients, getClientsWithTelegramError, getClientsWithoutTypes, getClientsByTypeId} = require('../services/clientService');
 
 router.post('/', validateClientData, async (req, res) => {
     const { phone_number, name, type_id, check_in_date, check_out_date, messanger_id } = req.validatedData;
@@ -24,6 +24,20 @@ router.get('/:id', async (req, res) => {
         }
     } catch (err) {
         res.status(500).json({ status: 'Failed to retrieve client', error: err.message });
+    }
+});
+
+router.get('/:type_id', async (req, res) => {
+    const { type_id } = req.params;
+    try {
+        const clients = await getClientsByTypeId(type_id);
+        if (clients) {
+            res.status(200).json(clients);
+        } else {
+            res.status(404).json({ status: 'Clients not found' });
+        }
+    } catch (err) {
+        res.status(500).json({ status: 'Failed to retrieve clients', error: err.message });
     }
 });
 
