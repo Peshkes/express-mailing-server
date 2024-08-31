@@ -1,24 +1,17 @@
 const db = require("../api/db/dbConfig");
+const { getMessageById } = require("./messageService");
 
 /**
  * Отправляет сообщение немедленно (без сохранения в базе данных).
  * @param {string} message_text - Текст сообщения.
  * @param {number} recipient_type_id - ID типа получателя.
  * @param {string} media_path - Путь к медиа (может быть пустым).
- * @param {number} sending_date - Дата отправки в формате long timestamp.
  * @returns {Promise<Object>} - Объект с результатом отправки сообщения.
  */
-async function sendMessageImmediately(message_text, recipient_type_id, media_path, sending_date) {
-    // Здесь должна быть логика отправки сообщения немедленно
-    // Например, отправка в очередь или напрямую в другой сервис
+async function sendMessageImmediately(message_text, recipient_type_id, media_path) {
     try {
-        // Пример для отладки
+        const users = getCl
         return {
-            message_text,
-            recipient_type_id,
-            video_path,
-            image_path,
-            sending_date,
             status: 'Message sent immediately'
         };
     } catch (err) {
@@ -33,20 +26,13 @@ async function sendMessageImmediately(message_text, recipient_type_id, media_pat
  */
 async function sendDelayedMessageNow(id) {
     try {
-        // Получаем сообщение из базы данных
-        const message = await db('messages').where({ id }).first();
+        const message = getMessageById(id)
 
         if (!message) {
             throw new Error('Message not found');
         }
 
-        // Отправляем сообщение немедленно (логика отправки)
-        // Например, отправка в очередь или напрямую в другой сервис
-
-        return {
-            ...message,
-            status: 'Message sent immediately'
-        };
+        return sendMessageImmediately(message.message_text, message.recipient_type_id, message.media_path);
     } catch (err) {
         throw new Error(`Failed to send delayed message now: ${err.message}`);
     }

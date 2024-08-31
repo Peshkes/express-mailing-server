@@ -52,7 +52,7 @@ router.delete('/:id', checkMessageExists, async (req, res) => {
     }
 });
 
-router.post('/:id/send-now', checkMessageExists, async (req, res) => {
+router.post('/send-now/:id', checkMessageExists, async (req, res) => {
     const { id } = req.params;
     try {
         const result = await sendDelayedMessageNow(id);
@@ -63,9 +63,9 @@ router.post('/:id/send-now', checkMessageExists, async (req, res) => {
 });
 
 router.post('/send-now', validateMessageData, async (req, res) => {
-    const { message_text, recipient_type_id, media_path, sending_date, theme } = req.validatedData;
+    const { message_text, recipient_type_id, media_path} = req.validatedData;
     try {
-        const result = await sendMessageImmediately(message_text, recipient_type_id, media_path, sending_date, theme);
+        const result = await sendMessageImmediately(message_text, recipient_type_id, media_path);
         res.status(200).json({ status: 'Message sent immediately', result });
     } catch (err) {
         res.status(500).json({ status: 'Failed to send message immediately', error: err.message });
