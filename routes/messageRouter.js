@@ -1,9 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { validateMessageData, checkMessageExists, checkClientTypeExists } = require("../middlewares/messageMiddleware");
+const { validateMessageData, checkMessageExists, checkClientTypeExists, checkNameIsNotNull } = require("../middlewares/messageMiddleware");
 const { addMessage, getMessages, getMessageById, updateMessage, deleteMessage,
     searchMessages, getMessagesByRecipientType, getMessagesWithPaginationAndFilter,
     getUpcomingMailings } = require('../services/messageService');
+const {getSample, addSample, getSamples} = require('services/sampleMessageService');
 const { sendDelayedMessageNow, sendMessageImmediately } = require('../services/sendingService');
 
 router.post('/', validateMessageData, async (req, res) => {
@@ -119,5 +120,36 @@ router.get('/all/recipient-type/:id', checkClientTypeExists, async (req, res) =>
         res.status(500).json({ status: 'Failed to retrieve messages', error: err.message });
     }
 });
+
+router.post('/sample' , validateMessageData, checkNameIsNotNull,  async (req, res) => {
+    const { sample_name, message_text, recipient_type_id, media_path, sending_date } = req.body;
+    try {
+        const sample_id = await addSample(sample_name, message_text, recipient_type_id, media_path, sending_date);
+        res.status(200).json(sample_id);
+    } catch (err) {
+        res.status(500).json({ status: 'Failed to add sample', error: err.message });
+    }
+})
+
+router.get('/sample/:id' , async (req, res) => {
+    const { id } = req.params;
+    try {
+        const sample = await getSample(id);
+        res.status(200).json(sample);
+    } catch (err) {
+        res.status(500).json({ status: 'Failed to retrieve sample', error: err.message });
+    }
+})
+
+router.get('/samples' , async (req, res) => {
+    try {
+        const sample = await getSamples();
+        res.status(200).json(sample);
+    } catch (err) {
+        res.status(500).json({ status: 'Failed to retrieve sample', error: err.message });
+    }
+})
+
+
 
 module.exports = router;

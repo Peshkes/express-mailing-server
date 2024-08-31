@@ -9,14 +9,6 @@ function validateMessageText(message_text) {
     return typeof message_text === 'string' && message_text.trim().length > 0;
 }
 
-/**
- * Проверяет корректность ID типа получателя.
- * @param {number} recipient_type_id - ID типа получателя.
- * @returns {boolean} - Корректность ID типа получателя.
- */
-function validateRecipientTypeId(recipient_type_id) {
-    return Number.isInteger(recipient_type_id) && recipient_type_id > 0;
-}
 
 /**
  * Проверяет корректность ссылки на видео.
@@ -49,7 +41,6 @@ async function validateMessageExists(messageId) {
 module.exports = {
     validateSendingDate,
     validateMessageText,
-    validateRecipientTypeId,
     validateMediaPath,
     validateMessageExists
 };
