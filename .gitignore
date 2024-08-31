@@ -4,5 +4,6 @@
 /httpRequests/
 # Datasource local storage ignored files
 /.idea/
+/node_modules/
 # My Configs
 /api/config.js
