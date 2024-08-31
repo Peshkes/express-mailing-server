@@ -26,6 +26,7 @@ exports.up = async knex => {
 
     await knex.schema.createTable('messages', table => {
         table.increments('id').primary();
+        table.string('theme').notNullable();
         table.text('message_text').notNullable();
         table.integer('recipient_type_id').unsigned().references('id').inTable('client_types');
         table.string('media_path');
@@ -35,6 +36,7 @@ exports.up = async knex => {
     await knex.schema.createTable('samples', table => {
         table.increments('id').primary();
         table.string('sample_name').notNullable();
+        table.string('theme').notNullable();
         table.text('message_text').notNullable();
         table.integer('recipient_type_id').unsigned().references('id').inTable('client_types');
         table.string('media_path');

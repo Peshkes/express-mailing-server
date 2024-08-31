@@ -9,6 +9,15 @@ function validateMessageText(message_text) {
     return typeof message_text === 'string' && message_text.trim().length > 0;
 }
 
+/**
+ * Проверяет корректность темы сообщения.
+ * @param {string} theme - Тема сообщения.
+ * @returns {boolean} - Корректность текста.
+ */
+function validateMessageTheme(theme) {
+    return typeof theme === 'string' && theme.trim().length > 0;
+}
+
 
 /**
  * Проверяет корректность ссылки на видео.
@@ -42,5 +51,6 @@ module.exports = {
     validateSendingDate,
     validateMessageText,
     validateMediaPath,
-    validateMessageExists
+    validateMessageExists,
+    validateMessageTheme
 };

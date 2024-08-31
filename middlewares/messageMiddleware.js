@@ -1,10 +1,9 @@
 const {validateSendingDate, validateMessageText, validateMessageExists,
-    validateMediaPath
-} = require('../validators/messageValidator');
+    validateMediaPath, validateMessageTheme} = require('../validators/messageValidator');
 const {validateClientType} = require('../validators/clientValidator');
 
 async function validateMessageData(req, res, next) {
-    const {message_text, recipient_type_id, media_path, sending_date} = req.body;
+    const {message_text, recipient_type_id, media_path, sending_date, theme} = req.body;
 
     const isMessageTextValid = validateMessageText(message_text);
     if (!isMessageTextValid) {
@@ -16,12 +15,17 @@ async function validateMessageData(req, res, next) {
         return res.status(400).json({status: 'Invalid media path'});
     }
 
+    const isThemeValid = validateMessageTheme(theme);
+    if (!isThemeValid) {
+        return res.status(400).json({status: 'Invalid theme'});
+    }
+
     const isSendingDateValid = validateSendingDate(sending_date);
     if (!isSendingDateValid) {
         return res.status(400).json({status: 'Invalid sending date'});
     }
 
-    req.validatedMessageData = {message_text, recipient_type_id, media_path, sending_date};
+    req.validatedMessageData = {message_text, recipient_type_id, media_path, sending_date, theme};
     next();
 }
 

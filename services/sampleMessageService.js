@@ -3,6 +3,7 @@ const db = require("../api/db/dbConfig");
 /**
  * Добавляет новый шаблон рассылки.
  * @param {string} sample_name - Название шаблона.
+ * @param {string} theme - Тема сообщения.
  * @param {string} message_text - Текст сообщения.
  * @param {number} recipient_type_id - ID типа получателя.
  * @param {string} [media_path] - Путь к медиафайлу (опционально).
@@ -10,10 +11,11 @@ const db = require("../api/db/dbConfig");
  * @returns {Promise<number>} - ID добавленной рассылки.
  * @throws {Error} - В случае ошибки при добавлении рассылки.
  */
-async function addSample(sample_name, message_text, recipient_type_id, media_path, sending_date) {
+async function addSample(sample_name, message_text, recipient_type_id, media_path, sending_date, theme) {
     try {
         const [id] = await db('samples').insert({
             sample_name,
+            theme,
             message_text,
             recipient_type_id,
             media_path,

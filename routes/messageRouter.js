@@ -8,9 +8,9 @@ const {getSample, addSample, getSamples} = require('services/sampleMessageServic
 const { sendDelayedMessageNow, sendMessageImmediately } = require('../services/sendingService');
 
 router.post('/', validateMessageData, async (req, res) => {
-    const { message_text, recipient_type_id, media_path, sending_date } = req.validatedData;
+    const { message_text, recipient_type_id, media_path, sending_date, theme } = req.validatedData;
     try {
-        const result = await addMessage(message_text, recipient_type_id, media_path, sending_date);
+        const result = await addMessage(message_text, recipient_type_id, media_path, sending_date, theme);
         res.status(201).json({ status: 'Message added successfully', id: result.id });
     } catch (err) {
         res.status(500).json({ status: 'Failed to add message', error: err.message });
@@ -33,9 +33,9 @@ router.get('/:id', async (req, res) => {
 
 router.put('/:id', checkMessageExists, validateMessageData, async (req, res) => {
     const { id } = req.params;
-    const { message_text, recipient_type_id, media_path, sending_date } = req.validatedData;
+    const { message_text, recipient_type_id, media_path, sending_date, theme } = req.validatedData;
     try {
-        const message = await updateMessage(id, message_text, recipient_type_id, media_path, sending_date);
+        const message = await updateMessage(id, message_text, recipient_type_id, media_path, sending_date, theme);
         res.status(200).json({ status: 'Message updated successfully', message });
     } catch (err) {
         res.status(500).json({ status: 'Failed to update message', error: err.message });
@@ -63,9 +63,9 @@ router.post('/:id/send-now', checkMessageExists, async (req, res) => {
 });
 
 router.post('/send-now', validateMessageData, async (req, res) => {
-    const { message_text, recipient_type_id, media_path, sending_date } = req.validatedData;
+    const { message_text, recipient_type_id, media_path, sending_date, theme } = req.validatedData;
     try {
-        const result = await sendMessageImmediately(message_text, recipient_type_id, media_path, sending_date);
+        const result = await sendMessageImmediately(message_text, recipient_type_id, media_path, sending_date, theme);
         res.status(200).json({ status: 'Message sent immediately', result });
     } catch (err) {
         res.status(500).json({ status: 'Failed to send message immediately', error: err.message });
@@ -122,9 +122,9 @@ router.get('/all/recipient-type/:id', checkClientTypeExists, async (req, res) =>
 });
 
 router.post('/sample' , validateMessageData, checkNameIsNotNull,  async (req, res) => {
-    const { sample_name, message_text, recipient_type_id, media_path, sending_date } = req.body;
+    const { sample_name, message_text, recipient_type_id, media_path, sending_date, theme } = req.body;
     try {
-        const sample_id = await addSample(sample_name, message_text, recipient_type_id, media_path, sending_date);
+        const sample_id = await addSample(sample_name, message_text, recipient_type_id, media_path, sending_date, theme);
         res.status(200).json(sample_id);
     } catch (err) {
         res.status(500).json({ status: 'Failed to add sample', error: err.message });
