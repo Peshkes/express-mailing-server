@@ -4,74 +4,30 @@ const { validateMessageData, checkMessageExists, checkClientTypeExists, checkNam
 const { addMessage, getMessages, getMessageById, updateMessage, deleteMessage,
     searchMessages, getMessagesByRecipientType, getMessagesWithPaginationAndFilter,
     getUpcomingMailings } = require('../services/messageService');
-const {getSample, addSample, getSamples} = require('../services/sampleMessageService');
+const { getSample, addSample, getSamples } = require('../services/sampleMessageService');
 const { sendDelayedMessageNow, sendMessageImmediately } = require('../services/sendingService');
-
-router.post('/', validateMessageData, async (req, res) => {
-    const { message_text, recipient_type_id, media_path, sending_date, theme } = req.validatedData;
-    try {
-        const result = await addMessage(message_text, recipient_type_id, media_path, sending_date, theme);
-        res.status(201).json({ status: 'Message added successfully', id: result.id });
-    } catch (err) {
-        res.status(500).json({ status: 'Failed to add message', error: err.message });
-    }
-});
-
-router.get('/:id', async (req, res) => {
-    const { id } = req.params;
-    try {
-        const message = await getMessageById(id);
-        if (message) {
-            res.status(200).json(message);
-        } else {
-            res.status(404).json({ status: 'Message not found' });
-        }
-    } catch (err) {
-        res.status(500).json({ status: 'Failed to retrieve message', error: err.message });
-    }
-});
-
-router.put('/:id', checkMessageExists, validateMessageData, async (req, res) => {
-    const { id } = req.params;
-    const { message_text, recipient_type_id, media_path, sending_date, theme } = req.validatedData;
-    try {
-        const message = await updateMessage(id, message_text, recipient_type_id, media_path, sending_date, theme);
-        res.status(200).json({ status: 'Message updated successfully', message });
-    } catch (err) {
-        res.status(500).json({ status: 'Failed to update message', error: err.message });
-    }
-});
-
-router.delete('/:id', checkMessageExists, async (req, res) => {
-    const { id } = req.params;
-    try {
-        const message = await deleteMessage(id);
-        res.status(200).json({ status: 'Message deleted successfully', message });
-    } catch (err) {
-        res.status(500).json({ status: 'Failed to delete message', error: err.message });
-    }
-});
 
 router.post('/send-now/:id', checkMessageExists, async (req, res) => {
     const { id } = req.params;
     try {
-        const result = await sendDelayedMessageNow(id);
-        res.status(200).json({ status: 'Message sent immediately', result });
+        await sendDelayedMessageNow(id);
+        res.status(200).json({ status: 'Message sent immediately'});
     } catch (err) {
         res.status(500).json({ status: 'Failed to send message immediately', error: err.message });
     }
 });
 
-router.post('/send-now', validateMessageData, async (req, res) => {
-    const { message_text, recipient_type_id, media_path} = req.validatedData;
+router.post('/send-now', async (req, res) => {
+    const { message_text, recipient_type_id, media_path } = req.body;
     try {
-        const result = await sendMessageImmediately(message_text, recipient_type_id, media_path);
-        res.status(200).json({ status: 'Message sent immediately', result });
+        await sendMessageImmediately(message_text, recipient_type_id, media_path);
+        res.status(200).json({ status: 'Message sent immediately'});
     } catch (err) {
         res.status(500).json({ status: 'Failed to send message immediately', error: err.message });
     }
 });
 
+// Маршруты для работы с выборками сообщений
 router.get('/all', async (req, res) => {
     try {
         const messages = await getMessages();
@@ -121,7 +77,8 @@ router.get('/all/recipient-type/:id', checkClientTypeExists, async (req, res) =>
     }
 });
 
-router.post('/sample' , validateMessageData, checkNameIsNotNull,  async (req, res) => {
+// Маршруты для работы с образцами сообщений
+router.post('/sample', validateMessageData, checkNameIsNotNull, async (req, res) => {
     const { sample_name, message_text, recipient_type_id, media_path, sending_date, theme } = req.body;
     try {
         const sample_id = await addSample(sample_name, message_text, recipient_type_id, media_path, sending_date, theme);
@@ -129,9 +86,9 @@ router.post('/sample' , validateMessageData, checkNameIsNotNull,  async (req, re
     } catch (err) {
         res.status(500).json({ status: 'Failed to add sample', error: err.message });
     }
-})
+});
 
-router.get('/sample/:id' , async (req, res) => {
+router.get('/sample/:id', async (req, res) => {
     const { id } = req.params;
     try {
         const sample = await getSample(id);
@@ -139,17 +96,63 @@ router.get('/sample/:id' , async (req, res) => {
     } catch (err) {
         res.status(500).json({ status: 'Failed to retrieve sample', error: err.message });
     }
-})
+});
 
-router.get('/samples' , async (req, res) => {
+router.get('/samples', async (req, res) => {
     try {
-        const sample = await getSamples();
-        res.status(200).json(sample);
+        const samples = await getSamples();
+        res.status(200).json(samples);
     } catch (err) {
-        res.status(500).json({ status: 'Failed to retrieve sample', error: err.message });
+        res.status(500).json({ status: 'Failed to retrieve samples', error: err.message });
     }
-})
+});
 
+// Маршруты для работы с конкретными сообщениями (обновление, удаление)
+router.put('/:id', checkMessageExists, validateMessageData, async (req, res) => {
+    const { id } = req.params;
+    const { message_text, recipient_type_id, media_path, sending_date, theme } = req.validatedData;
+    try {
+        const message = await updateMessage(id, message_text, recipient_type_id, media_path, sending_date, theme);
+        res.status(200).json({ status: 'Message updated successfully', message });
+    } catch (err) {
+        res.status(500).json({ status: 'Failed to update message', error: err.message });
+    }
+});
+
+router.delete('/:id', checkMessageExists, async (req, res) => {
+    const { id } = req.params;
+    try {
+        const message = await deleteMessage(id);
+        res.status(200).json({ status: 'Message deleted successfully', message });
+    } catch (err) {
+        res.status(500).json({ status: 'Failed to delete message', error: err.message });
+    }
+});
+
+router.get('/:id', async (req, res) => {
+    const { id } = req.params;
+    try {
+        const message = await getMessageById(id);
+        if (message) {
+            res.status(200).json(message);
+        } else {
+            res.status(404).json({ status: 'Message not found' });
+        }
+    } catch (err) {
+        res.status(500).json({ status: 'Failed to retrieve message', error: err.message });
+    }
+});
+
+router.post('/', validateMessageData, async (req, res) => {
+    const { message_text, recipient_type_id, media_path, sending_date, theme } = req.validatedData;
+    try {
+        const result = await addMessage(message_text, recipient_type_id, media_path, sending_date, theme);
+        res.status(201).json({ status: 'Message added successfully', id: result.id });
+    } catch (err) {
+        res.status(500).json({ status: 'Failed to add message', error: err.message });
+    }
+});
 
 
 module.exports = router;
+

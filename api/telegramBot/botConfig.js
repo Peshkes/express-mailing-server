@@ -4,6 +4,10 @@ const db = require('../db/dbConfig');
 
 const bot = new TelegramBot(config.telegramToken, { polling: true });
 
+const normalizePhoneNumber = (phoneNumber) => {
+    return phoneNumber.replace(/\+/g, '').replace(/\s+/g, '');
+};
+
 const requestPhoneNumber = (chatId) => {
     const options = {
         reply_markup: {
@@ -22,11 +26,14 @@ const requestPhoneNumber = (chatId) => {
 
 const handlePhoneNumber = async (msg) => {
     const chatId = msg.chat.id;
-    const phoneNumber = msg.contact?.phone_number;
+    let phoneNumber = msg.contact?.phone_number;
 
     if (phoneNumber) {
+        phoneNumber = normalizePhoneNumber(phoneNumber);
         try {
-            const client = await db('clients').where({ phone_number: phoneNumber }).first();
+            const client = await db('clients')
+                .whereRaw('REPLACE(phone_number, "+", "") = ?', [phoneNumber])
+                .first();
 
             if (client) {
                 if (client.chat_id) {

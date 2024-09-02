@@ -3,7 +3,6 @@ const fs = require('fs');
 const config = require('../api/config');
 const db = require("../api/db/dbConfig");
 
-// Инициализация бота
 const bot = new TelegramBot(config.telegramToken, {polling: false});
 
 const sendTelegramMessage = async (chatId, message, mediaPath = null) => {
@@ -26,16 +25,16 @@ const sendTelegramMessage = async (chatId, message, mediaPath = null) => {
     }
 };
 
-const processTelegramMessages = async (messages) => {
-    for (const messageObj of messages) {
-        let {phoneNumber, chatId, message, mediaPath} = messageObj;
+//users, message_text, media_path
+const processTelegramMessages = async (users, message_text, media_path) => {
+    for (const user of users) {
 
-        if (!chatId) {
-            console.log(`Chat ID для ${phoneNumber} не найден`);
+        if (!user.chat_id) {
+            console.log(`Chat ID для ${user.phone_number} не найден`);
             continue;
         }
 
-        await sendTelegramMessage(chatId, message, mediaPath);
+        await sendTelegramMessage(user.chat_id, message_text, media_path);
 
         await new Promise(resolve => setTimeout(resolve, 500));
     }

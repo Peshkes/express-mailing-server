@@ -82,15 +82,20 @@ async function updateMessage(id, message_text, recipient_type_id, media_path, se
 /**
  * Удаляет сообщение по ID.
  * @param {number} id - ID сообщения.
- * @returns {Promise<Object>} - Удалённое сообщение.
+ * @returns {Promise<Object>} - Удалённое сообщение или null, если сообщение не найдено.
  */
 async function deleteMessage(id) {
     try {
-        const [result] = await db('messages')
+        const deletedMessages = await db('messages')
             .where({ id })
             .del()
             .returning('*');
-        return result;
+
+        if (deletedMessages.length === 0) {
+            return null;
+        }
+
+        return deletedMessages[0];
     } catch (err) {
         throw new Error(`Failed to delete message: ${err.message}`);
     }

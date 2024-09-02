@@ -6,6 +6,15 @@ require('./telegramBot/botConfig');
 
 const clientRoutes = require('../routes/clientRouter');
 const messageRoutes = require('../routes/messageRouter');
+const cron = require("node-cron");
+const {sendScheduledMessages} = require("../services/sendingService");
+
+cron.schedule('* * * * *', async () => {
+    console.log('Checking for scheduled messages...');
+    const result = await sendScheduledMessages();
+    if (result)
+        console.log(result);
+});
 
 const server = express();
 

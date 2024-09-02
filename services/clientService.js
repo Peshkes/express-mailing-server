@@ -59,19 +59,16 @@ async function getClientById(clientId) {
 }
 
 /**
- * Получает клиента по ID из базы данных.
+ * Получает клиентов по ID типа из базы данных.
  * @param {number} typeId - ID типа.
- * @returns {Promise<Object>} - Объект клиента.
+ * @returns {Promise<Array>} - Массив клиентов.
  */
 async function getClientsByTypeId(typeId) {
     try {
-        const client = await db('clients').where({type_id: typeId}).first();
-        if (!client) {
-            throw new Error('Client not found');
-        }
-        return client;
+        const clients = await db('clients').where({ type_id: typeId });
+        return clients || [];
     } catch (err) {
-        throw new Error(`Failed to retrieve client: ${err.message}`);
+        throw new Error(`Failed to retrieve clients: ${err.message}`);
     }
 }
 
@@ -163,15 +160,15 @@ async function deleteClient(id) {
  * @param {Object} options - Опции запроса.
  * @param {number} options.page - Номер страницы.
  * @param {number} options.limit - Количество клиентов на странице.
- * @param {string} [options.type] - Тип клиента для фильтрации (опционально).
+ * @param {number} [options.typeId] - Тип клиента для фильтрации (опционально).
  * @returns {Promise<Object>} - Объект с массивом клиентов и общим количеством страниц.
  */
-async function getClientsWithPaginationAndFilter({page, limit, type}) {
+async function getClientsWithPaginationAndFilter({page, limit, typeId}) {
     try {
         let query = db('clients');
 
-        if (type) {
-            query = query.where('type', type);
+        if (typeId) {
+            query = query.where('type_id', typeId);
         }
 
         const offset = (page - 1) * limit;
