@@ -4,7 +4,7 @@ const { validateMessageData, checkMessageExists, checkClientTypeExists, checkNam
 const { addMessage, getMessages, getMessageById, updateMessage, deleteMessage,
     searchMessages, getMessagesByRecipientType, getMessagesWithPaginationAndFilter,
     getUpcomingMailings } = require('../services/messageService');
-const { getSample, addSample, getSamples } = require('../services/sampleMessageService');
+const { getSample, addSample, getSamples, updateSample, deleteSample} = require('../services/sampleMessageService');
 const { sendDelayedMessageNow, sendMessageImmediately } = require('../services/sendingService');
 
 router.post('/send-now/:id', checkMessageExists, async (req, res) => {
@@ -85,6 +85,24 @@ router.post('/sample', validateMessageData, checkNameIsNotNull, async (req, res)
         res.status(200).json(sample_id);
     } catch (err) {
         res.status(500).json({ status: 'Failed to add sample', error: err.message });
+    }
+});
+
+router.put('/sample/:id', validateMessageData, checkNameIsNotNull, async (req, res) => {
+    try {
+        await updateSample(req.params.id, req.body);
+        res.status(200).json({ status: 'Sample updated successfully' });
+    } catch (err) {
+        res.status(500).json({ status: 'Failed to update sample', error: err.message });
+    }
+});
+
+router.delete('/sample/:id', async (req, res) => {
+    try {
+        await deleteSample(req.params.id);
+        res.status(200).json({ status: 'Sample deleted successfully' });
+    } catch (err) {
+        res.status(500).json({ status: 'Failed to delete sample', error: err.message });
     }
 });
 

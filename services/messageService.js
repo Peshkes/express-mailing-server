@@ -59,11 +59,19 @@ async function getMessageById(id) {
  * @param {number} recipient_type_id - Новый ID типа получателя.
  * @param {string} media_path - Новый путь к медиа.
  * @param {number} sending_date - Новая дата отправки в формате long timestamp.
- * @returns {Promise<Object>} - Обновлённое сообщение.
+ * @returns {Promise<Object>} - Старое сообщение до изменения.
  */
 async function updateMessage(id, message_text, recipient_type_id, media_path, sending_date, theme) {
     try {
-        const [result] = await db('messages')
+        const oldMessage = await db('messages')
+            .where({ id })
+            .first();
+
+        if (!oldMessage) {
+            throw new Error(`Message with ID ${id} not found.`);
+        }
+
+        await db('messages')
             .where({ id })
             .update({
                 theme,
@@ -71,9 +79,9 @@ async function updateMessage(id, message_text, recipient_type_id, media_path, se
                 recipient_type_id,
                 media_path,
                 sending_date
-            })
-            .returning('*');
-        return result;
+            });
+
+        return oldMessage;
     } catch (err) {
         throw new Error(`Failed to update message: ${err.message}`);
     }

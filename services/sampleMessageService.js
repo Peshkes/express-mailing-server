@@ -54,8 +54,67 @@ async function getSamples() {
     }
 }
 
+/**
+ * Удаляет шаблон рассылки по ID и возвращает объект до его удаления.
+ * @param {number} id - ID рассылки, которую нужно удалить.
+ * @returns {Promise<Object>} - Объект до удаления.
+ * @throws {Error} - В случае ошибки при удалении рассылки.
+ */
+async function deleteSample(id) {
+    try {
+        const existingSample = await db('samples')
+            .where('id', id)
+            .first();
+
+        if (!existingSample) {
+            throw new Error(`Sample with ID ${id} not found.`);
+        }
+
+        await db('samples')
+            .where('id', id)
+            .del();
+
+        return existingSample;
+    } catch (err) {
+        throw new Error(`Failed to delete sample: ${err.message}`);
+    }
+}
+
+/**
+ * Обновляет данные шаблона рассылки по ID и возвращает объект до его обновления.
+ * @param {number} id - ID рассылки, которую нужно обновить.
+ * @param {Object} updateData - Объект с обновляемыми данными.
+ * @param {string} [updateData.sample_name] - Новое название шаблона.
+ * @param {string} [updateData.theme] - Новая тема сообщения.
+ * @param {string} [updateData.message_text] - Новый текст сообщения.
+ * @param {number} [updateData.recipient_type_id] - Новый ID типа получателя.
+ * @param {string} [updateData.media_path] - Новый путь к медиафайлу.
+ * @param {number} [updateData.sending_date] - Новая дата отправки в формате long timestamp.
+ * @returns {Promise<Object>} - Объект до обновления.
+ * @throws {Error} - В случае ошибки при обновлении рассылки.
+ */
+async function updateSample(id, updateData) {
+    try {
+        const existingSample = await db('samples')
+            .where('id', id)
+            .first();
+
+        if (!existingSample) {
+            throw new Error(`Sample with ID ${id} not found.`);
+        }
+
+        await db('samples')
+            .where('id', id)
+            .update(updateData);
+
+        return existingSample;
+    } catch (err) {
+        throw new Error(`Failed to update sample: ${err.message}`);
+    }
+}
+
 module.exports = {
-    addSample,
-    getSample,
+    addSample, updateSample,
+    getSample, deleteSample,
     getSamples
 }
