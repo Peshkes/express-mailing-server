@@ -66,7 +66,7 @@ router.put('/:id/:messanger_id', checkClientExists, checkMessengerExists, async 
     const { id, messanger_id } = req.params;
     try {
         await updateClientsMessenger(id, messanger_id);
-        res.status(200);
+        res.status(200).json({ status: 'Messenger updated'});
     } catch (err) {
         res.status(500).json({ status: 'Failed to update client: ' + err.message });
     }
