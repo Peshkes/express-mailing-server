@@ -1,7 +1,7 @@
 const { validateTimestamps, validatePhoneNumber, validateClientType, validateClientExists, validateMessenger } = require("../validators/clientValidator");
 
 async function validateClientData(req, res, next) {
-    const { phone_number, name, type_id, check_in_date, check_out_date, messanger_id } = req.body;
+    const { phone_number, name, type_id, check_in_date, check_out_date, messanger_id, chat_id } = req.body;
 
     if (!phone_number || !name || !type_id || !check_in_date || !check_out_date) {
         return res.status(400).json({ status: 'Missing required fields' });
@@ -35,7 +35,7 @@ async function validateClientData(req, res, next) {
             type_id,
             check_in_date,
             check_out_date,
-            messanger_id
+            messanger_id, chat_id
         };
 
         next();

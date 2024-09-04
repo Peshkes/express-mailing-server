@@ -4,12 +4,12 @@ const db = require("../api/db/dbConfig");
  * Добавляет сообщение в базу данных.
  * @param {string} theme - Тема сообщения.
  * @param {string} message_text - Текст сообщения.
- * @param {number} recipient_type_id - ID типа получателя.
+ * @param {number | null} recipient_type_id - ID типа получателя.
  * @param {string} media_path - Новый путь к медиа.
  * @param {number} sending_date - Дата отправки в формате long timestamp.
  * @returns {Promise<Object>} - Объект с ID добавленного сообщения.
  */
-async function addMessage(message_text, recipient_type_id, media_path, sending_date, theme) {
+async function addMessage(message_text, recipient_type_id = null, media_path, sending_date, theme) {
     try {
         const [result] = await db('messages')
             .insert({
@@ -56,12 +56,12 @@ async function getMessageById(id) {
  * @param {number} id - ID сообщения.
  * @param {string} theme - Тема сообщения.
  * @param {string} message_text - Новый текст сообщения.
- * @param {number} recipient_type_id - Новый ID типа получателя.
+ * @param {number | null} recipient_type_id - Новый ID типа получателя.
  * @param {string} media_path - Новый путь к медиа.
  * @param {number} sending_date - Новая дата отправки в формате long timestamp.
  * @returns {Promise<Object>} - Старое сообщение до изменения.
  */
-async function updateMessage(id, message_text, recipient_type_id, media_path, sending_date, theme) {
+async function updateMessage(id, message_text, recipient_type_id = null, media_path, sending_date, theme) {
     try {
         const oldMessage = await db('messages')
             .where({ id })

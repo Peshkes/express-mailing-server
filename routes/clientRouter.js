@@ -4,9 +4,9 @@ const {validateClientData, checkClientExists, checkMessengerExists} = require(".
 const {addClient, getClients, getClientById, deleteClient, updateClient, updateClientsMessenger, getClientsWithPaginationAndFilter, searchClients, getLastAddedClients, getClientsWithTelegramError, getClientsWithoutTypes, getClientsByTypeId} = require('../services/clientService');
 
 router.post('/', validateClientData, async (req, res) => {
-    const { phone_number, name, type_id, check_in_date, check_out_date, messanger_id } = req.validatedData;
+    const { phone_number, name, type_id, check_in_date, check_out_date, messanger_id, chat_id } = req.validatedData;
     try {
-        const result = await addClient(phone_number, name, type_id, check_in_date, check_out_date, messanger_id);
+        const result = await addClient(phone_number, name, type_id, check_in_date, check_out_date, messanger_id, chat_id);
         res.status(201).json({ status: 'Client added successfully', id: result.id });
     } catch (err) {
         res.status(500).json({ status: 'Failed to add client', error: err.message });

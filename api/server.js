@@ -6,6 +6,8 @@ require('./telegramBot/botConfig');
 
 const clientRoutes = require('../routes/clientRouter');
 const messageRoutes = require('../routes/messageRouter');
+const utilityRoutes = require('../routes/utilityRouter')
+
 const cron = require("node-cron");
 const {sendScheduledMessages} = require("../services/sendingService");
 
@@ -28,5 +30,6 @@ server.get('/', (req, res) => {
 
 server.use('/client', clientRoutes);
 server.use('/message', messageRoutes);
+server.use('/utility', utilityRoutes);
 
 module.exports = server;

@@ -5,13 +5,13 @@ const db = require("../api/db/dbConfig");
  * @param {string} sample_name - Название шаблона.
  * @param {string} theme - Тема сообщения.
  * @param {string} message_text - Текст сообщения.
- * @param {number} recipient_type_id - ID типа получателя.
+ * @param {number | null} recipient_type_id - ID типа получателя.
  * @param {string} [media_path] - Путь к медиафайлу (опционально).
  * @param {number} sending_date - Дата отправки в формате long timestamp.
  * @returns {Promise<number>} - ID добавленной рассылки.
  * @throws {Error} - В случае ошибки при добавлении рассылки.
  */
-async function addSample(sample_name, message_text, recipient_type_id, media_path, sending_date, theme) {
+async function addSample(sample_name, message_text, recipient_type_id = null, media_path, sending_date, theme) {
     try {
         const [id] = await db('samples').insert({
             sample_name,
@@ -87,7 +87,7 @@ async function deleteSample(id) {
  * @param {string} [updateData.sample_name] - Новое название шаблона.
  * @param {string} [updateData.theme] - Новая тема сообщения.
  * @param {string} [updateData.message_text] - Новый текст сообщения.
- * @param {number} [updateData.recipient_type_id] - Новый ID типа получателя.
+ * @param {number | null} [updateData.recipient_type_id] - Новый ID типа получателя.
  * @param {string} [updateData.media_path] - Новый путь к медиафайлу.
  * @param {number} [updateData.sending_date] - Новая дата отправки в формате long timestamp.
  * @returns {Promise<Object>} - Объект до обновления.
