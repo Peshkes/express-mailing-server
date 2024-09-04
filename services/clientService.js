@@ -117,16 +117,21 @@ async function updateClient(id, phone_number, name, type_id, check_in_date, chec
  */
 async function updateClientsMessenger(id, messenger_id) {
     try {
-        const [result] = await db('clients')
-            .where({id})
-            .update({
-                messenger_id
-            })
-            .returning('id');
-        if (!result) {
+        const oldClient = await db('clients').where({ id }).first();
+        if (!oldClient) {
             throw new Error('Client not found');
         }
-        return {id: result};
+
+        const [updatedId] = await db('clients')
+            .where({ id })
+            .update({ messenger_id })
+            .returning('id');
+
+        if (!updatedId) {
+            throw new Error('Failed to update client');
+        }
+
+        return oldClient;
     } catch (err) {
         throw new Error(`Failed to update client: ${err.message}`);
     }

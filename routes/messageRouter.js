@@ -13,7 +13,7 @@ router.post('/send-now/:id', checkMessageExists, async (req, res) => {
         await sendDelayedMessageNow(id);
         res.status(200).json({ status: 'Message sent immediately'});
     } catch (err) {
-        res.status(500).json({ status: 'Failed to send message immediately', error: err.message });
+        res.status(500).json({ status: 'Failed to send message immediately: ' + err.message });
     }
 });
 
@@ -23,7 +23,7 @@ router.post('/send-now', async (req, res) => {
         await sendMessageImmediately(message_text, recipient_type_id, media_path);
         res.status(200).json({ status: 'Message sent immediately'});
     } catch (err) {
-        res.status(500).json({ status: 'Failed to send message immediately', error: err.message });
+        res.status(500).json({ status: 'Failed to send message immediately: ' + err.message });
     }
 });
 
@@ -33,7 +33,7 @@ router.get('/all', async (req, res) => {
         const messages = await getMessages();
         res.status(200).json(messages);
     } catch (err) {
-        res.status(500).json({ status: 'Failed to retrieve messages', error: err.message });
+        res.status(500).json({ status: 'Failed to retrieve messages:' + err.message });
     }
 });
 
@@ -43,7 +43,7 @@ router.get('/all/paginated', async (req, res) => {
         const messages = await getMessagesWithPaginationAndFilter({ page, limit, type });
         res.status(200).json(messages);
     } catch (err) {
-        res.status(500).json({ status: 'Failed to retrieve messages', error: err.message });
+        res.status(500).json({ status: 'Failed to retrieve messages:' + err.message });
     }
 });
 
@@ -53,7 +53,7 @@ router.get('/all/search', async (req, res) => {
         const messages = await searchMessages(text, date_from, date_to);
         res.status(200).json(messages);
     } catch (err) {
-        res.status(500).json({ status: 'Failed to search messages', error: err.message });
+        res.status(500).json({ status: 'Failed to search messages:' + err.message });
     }
 });
 
@@ -63,7 +63,7 @@ router.get('/all/upcoming/:count', async (req, res) => {
         const upcomingMailings = await getUpcomingMailings(count);
         res.status(200).json(upcomingMailings);
     } catch (err) {
-        res.status(500).json({ status: 'Failed to retrieve upcoming mailings', error: err.message });
+        res.status(500).json({ status: 'Failed to retrieve upcoming mailings:' + err.message });
     }
 });
 
@@ -73,7 +73,7 @@ router.get('/all/recipient-type/:id', checkClientTypeExists, async (req, res) =>
         const messages = await getMessagesByRecipientType(id);
         res.status(200).json(messages);
     } catch (err) {
-        res.status(500).json({ status: 'Failed to retrieve messages', error: err.message });
+        res.status(500).json({ status: 'Failed to retrieve messages: ' + err.message });
     }
 });
 
@@ -84,25 +84,25 @@ router.post('/sample', validateMessageData, checkNameIsNotNull, async (req, res)
         const sample_id = await addSample(sample_name, message_text, recipient_type_id, media_path, sending_date, theme);
         res.status(200).json(sample_id);
     } catch (err) {
-        res.status(500).json({ status: 'Failed to add sample', error: err.message });
+        res.status(500).json({ status: 'Failed to add sample: ' + err.message });
     }
 });
 
 router.put('/sample/:id', validateMessageData, checkNameIsNotNull, async (req, res) => {
     try {
-        await updateSample(req.params.id, req.body);
-        res.status(200).json({ status: 'Sample updated successfully' });
+        const sample = await updateSample(req.params.id, req.body);
+        res.status(200).json(sample);
     } catch (err) {
-        res.status(500).json({ status: 'Failed to update sample', error: err.message });
+        res.status(500).json({ status: 'Failed to update sample: ' + err.message });
     }
 });
 
 router.delete('/sample/:id', async (req, res) => {
     try {
-        await deleteSample(req.params.id);
-        res.status(200).json({ status: 'Sample deleted successfully' });
+        const sample = await deleteSample(req.params.id);
+        res.status(200).json(sample);
     } catch (err) {
-        res.status(500).json({ status: 'Failed to delete sample', error: err.message });
+        res.status(500).json({ status: 'Failed to delete sample:' + err.message });
     }
 });
 
@@ -112,7 +112,7 @@ router.get('/sample/:id', async (req, res) => {
         const sample = await getSample(id);
         res.status(200).json(sample);
     } catch (err) {
-        res.status(500).json({ status: 'Failed to retrieve sample', error: err.message });
+        res.status(500).json({ status: 'Failed to retrieve sample:' + err.message });
     }
 });
 
@@ -121,7 +121,7 @@ router.get('/samples', async (req, res) => {
         const samples = await getSamples();
         res.status(200).json(samples);
     } catch (err) {
-        res.status(500).json({ status: 'Failed to retrieve samples', error: err.message });
+        res.status(500).json({ status: 'Failed to retrieve samples: ' + err.message });
     }
 });
 
@@ -133,7 +133,7 @@ router.put('/:id', checkMessageExists, validateMessageData, async (req, res) => 
         const message = await updateMessage(id, message_text, recipient_type_id, media_path, sending_date, theme);
         res.status(200).json({ status: 'Message updated successfully', message });
     } catch (err) {
-        res.status(500).json({ status: 'Failed to update message', error: err.message });
+        res.status(500).json({ status: 'Failed to update message: ' + err.message });
     }
 });
 
@@ -141,9 +141,9 @@ router.delete('/:id', checkMessageExists, async (req, res) => {
     const { id } = req.params;
     try {
         const message = await deleteMessage(id);
-        res.status(200).json({ status: 'Message deleted successfully', message });
+        res.status(200).json(message);
     } catch (err) {
-        res.status(500).json({ status: 'Failed to delete message', error: err.message });
+        res.status(500).json({ status: 'Failed to delete message: ' + err.message });
     }
 });
 
@@ -157,7 +157,7 @@ router.get('/:id', async (req, res) => {
             res.status(404).json({ status: 'Message not found' });
         }
     } catch (err) {
-        res.status(500).json({ status: 'Failed to retrieve message', error: err.message });
+        res.status(500).json({ status: 'Failed to retrieve message: ' + err.message });
     }
 });
 
@@ -165,9 +165,9 @@ router.post('/', validateMessageData, async (req, res) => {
     const { message_text, recipient_type_id, media_path, sending_date, theme } = req.validatedData;
     try {
         const result = await addMessage(message_text, recipient_type_id, media_path, sending_date, theme);
-        res.status(201).json({ status: 'Message added successfully', id: result.id });
+        res.status(201).json(result.id);
     } catch (err) {
-        res.status(500).json({ status: 'Failed to add message', error: err.message });
+        res.status(500).json({ status: 'Failed to add message: ' + err.message });
     }
 });
 

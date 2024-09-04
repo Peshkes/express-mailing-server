@@ -11,7 +11,7 @@ router.get('/recipient-types', async (req, res) => {
             res.status(404).json({status: 'Types not found'});
         }
     } catch (err) {
-        res.status(500).json({status: 'Failed to add client', error: err.message});
+        res.status(500).json({status: 'Failed to find types: ' + err.message});
     }
 });
 
@@ -24,7 +24,7 @@ router.get('/messenger-types', async (req, res) => {
             res.status(404).json({status: 'Types not found'});
         }
     } catch (err) {
-        res.status(500).json({status: 'Failed to add client', error: err.message});
+        res.status(500).json({status: 'Failed to find types: ' + err.message});
     }
 });
 
