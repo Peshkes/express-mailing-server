@@ -3,7 +3,7 @@ const router = express.Router();
 const { validateMessageData, checkMessageExists, checkClientTypeExists, checkNameIsNotNull } = require("../middlewares/messageMiddleware");
 const { addMessage, getMessages, getMessageById, updateMessage, deleteMessage,
     searchMessages, getMessagesByRecipientType, getMessagesWithPaginationAndFilter,
-    getUpcomingMailings } = require('../services/messageService');
+    getUpcomingMailings, getFilteredMessages } = require('../services/messageService');
 const { getSample, addSample, getSamples, updateSample, deleteSample} = require('../services/sampleMessageService');
 const { sendDelayedMessageNow, sendMessageImmediately } = require('../services/sendingService');
 
@@ -54,6 +54,16 @@ router.get('/all/search', async (req, res) => {
         res.status(200).json(messages);
     } catch (err) {
         res.status(500).json({ status: 'Failed to search messages:' + err.message });
+    }
+});
+
+router.get('/all/full_filtered', async (req, res) => {
+    const { page = 1, limit = 10, type_id, search_string, date_to, date_from } = req.query;
+    try {
+        const messages = await getFilteredMessages({ page, limit, type_id, search_string, date_to, date_from });
+        res.status(200).json(messages);
+    } catch (err) {
+        res.status(500).json({ status: 'Failed to retrieve messages: ' + err.message });
     }
 });
 

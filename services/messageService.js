@@ -212,8 +212,53 @@ async function getUpcomingMailings(count) {
     }
 }
 
+/**
+ * Фильтрует сообщения по заданным параметрам.
+ * @param {Object} params - Объект с параметрами фильтрации.
+ * @param {number} params.page - Номер страницы.
+ * @param {number} params.limit - Количество элементов на странице.
+ * @param {number} [params.type_id] - Тип получателя (опционально).
+ * @param {string} [params.search_string] - Строка поиска по тексту сообщения (опционально).
+ * @param {long} [params.date_from] - Дата начала поиска (опционально, timestamp).
+ * @param {long} [params.date_to] - Дата окончания поиска (опционально, timestamp).
+ * @returns {Promise<Object>} - Объект с массивом сообщений и общим количеством страниц.
+ */
+async function getFilteredMessages({ page, limit, type_id, search_string, date_from, date_to }) {
+    try {
+        let query = db('messages');
+
+        if (type_id) query = query.where('recipient_type_id', type_id);
+        if (search_string) query = query.where('message_text', 'like', `%${search_string}%`);
+
+        if (date_from) query = query.where('sending_date', '>=', date_from);
+        if (date_to) query = query.where('sending_date', '<=', date_to);
+
+        const offset = (page - 1) * limit;
+        query = query.limit(limit).offset(offset);
+
+        const [messages, total] = await Promise.all([
+            query.clone().select('*'),
+            query.clone().count('* as total').first()
+        ]);
+
+        const totalPages = Math.ceil(total.total / limit);
+
+        return {
+            data: messages,
+            pagination: {
+                total: total.total,
+                page,
+                totalPages,
+                limit,
+            },
+        };
+    } catch (err) {
+        throw new Error(`Failed to retrieve messages: ${err.message}`);
+    }
+}
+
 module.exports = {
     addMessage, getMessages, getMessageById, updateMessage, deleteMessage,
     searchMessages, getMessagesByRecipientType, getMessagesWithPaginationAndFilter,
-    getUpcomingMailings
+    getUpcomingMailings, getFilteredMessages
 };

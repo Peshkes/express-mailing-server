@@ -280,10 +280,51 @@ async function getClientsWithoutTypes() {
     }
 }
 
+/**
+ * Фильтрует клиентов по заданным параметрам.
+ * @param {Object} params - Объект с параметрами фильтрации.
+ * @param {number} params.page - Номер страницы.
+ * @param {number} params.limit - Количество элементов на странице.
+ * @param {number} [params.type_id] - Тип клиента (опционально).
+ * @param {string} [params.search_type] - Тип поиска (опционально).
+ * @param {string} [params.search_string] - Строка поиска (опционально).
+ * @param {boolean} [params.tg_error] - Флаг ошибки в Telegram (опционально).
+ * @returns {Promise<Object>} - Объект с массивом клиентов и общим количеством страниц.
+ */
+async function getFilteredClients({ page, limit, type_id, search_type, search_string, tg_error }){
+    try {
+        let query = db('clients');
+
+        if (type_id) query = query.where('type_id', type_id);
+        if (tg_error) query = query.where('messenger_id', 2).where('chat_id', null);
+        if (search_type && search_string) query = query.where(search_type, 'like', `%${search_string}%`);
+
+        query = query.offset((page - 1) * limit).limit(limit);
+
+        const [clients, total] = await Promise.all([
+            query.clone().select('*').limit(limit).offset(offset),
+            query.clone().count('* as total').first()
+        ]);
+
+        const totalPages = Math.ceil(total.total / limit);
+
+        return {
+            data: clients,
+            pagination: {
+                total: total.total,
+                page,
+                totalPages,
+                limit,
+            },
+        };
+    } catch (err) {
+        throw new Error(`Failed to retrieve clients: ${err.message}`);
+    }
+}
 
 
 module.exports = {
     addClient, getClients, getClientById, updateClient, deleteClient, getClientsByTypeId,
     updateClientsMessenger, getClientsWithPaginationAndFilter,
-    searchClients, getLastAddedClients, getClientsWithTelegramError, getClientsWithoutTypes
+    searchClients, getLastAddedClients, getClientsWithTelegramError, getClientsWithoutTypes, getFilteredClients
 };
