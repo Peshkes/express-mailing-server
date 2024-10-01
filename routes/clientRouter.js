@@ -3,7 +3,7 @@ const router = express.Router();
 const {validateClientData, checkClientExists, checkMessengerExists} = require("../middlewares/clientMiddleware");
 const {addClient, getClients, getClientById, deleteClient, updateClient, updateClientsMessenger,
     getClientsWithPaginationAndFilter, searchClients, getLastAddedClients, getClientsWithTelegramError, getClientsWithoutTypes,
-    getClientsByTypeId, getFilteredClients} = require('../services/clientService');
+    getClientsByTypeId, getFilteredClients, updateClientsType} = require('../services/clientService');
 
 // Добавление клиента
 router.post('/', validateClientData, async (req, res) => {
@@ -55,11 +55,22 @@ router.delete('/:id', checkClientExists, async (req, res) => {
 });
 
 // Обновление мессенджера клиента
-router.put('/:id/:messanger_id', checkClientExists, checkMessengerExists, async (req, res) => {
+router.put('/:id/messanger/:messanger_id', checkClientExists, checkMessengerExists, async (req, res) => {
     const { id, messanger_id } = req.params;
     try {
         await updateClientsMessenger(id, messanger_id);
         res.status(200).json({ status: 'Messenger updated' });
+    } catch (err) {
+        res.status(500).json({ status: 'Failed to update client: ' + err.message });
+    }
+});
+
+// Обновление типа клиента
+router.put('/:id/type/:type_id', checkClientExists, async (req, res) => {
+    const { id, type_id } = req.params;
+    try {
+        await updateClientsType(id, type_id);
+        res.status(200).json({ status: 'Client type updated' });
     } catch (err) {
         res.status(500).json({ status: 'Failed to update client: ' + err.message });
     }

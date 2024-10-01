@@ -138,6 +138,34 @@ async function updateClientsMessenger(id, messenger_id) {
 }
 
 /**
+ * Обновляет ID мессенджера у клиента в базе данных.
+ * @param {number} id - ID клиента.
+ * @param {number} type_id - ID типа.
+ * @returns {Promise<Object>} - Объект с ID обновленного клиента.
+ */
+async function updateClientsType(id, type_id) {
+    try {
+        const oldClient = await db('clients').where({ id }).first();
+        if (!oldClient) {
+            throw new Error('Client not found');
+        }
+
+        const [updatedId] = await db('clients')
+            .where({ id })
+            .update({ type_id })
+            .returning('id');
+
+        if (!updatedId) {
+            throw new Error('Failed to update client');
+        }
+
+        return oldClient;
+    } catch (err) {
+        throw new Error(`Failed to update client: ${err.message}`);
+    }
+}
+
+/**
  * Удаляет клиента из базы данных.
  * @param {number} id - ID клиента.
  * @returns {Promise<Object>} - Объект удаленного клиента.
