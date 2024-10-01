@@ -206,8 +206,7 @@ async function getMessagesByRecipientType(recipient_type_id) {
         const messages = await db('messages')
             .where({ recipient_type_id })
             .select('*');
-
-        return messages.length ? messages : [];
+        return messages.length ? messages : null;
     } catch (err) {
         throw new Error(`Failed to retrieve messages by recipient type: ${err.message}`);
     }
@@ -228,8 +227,7 @@ async function getUpcomingMailings(count) {
             .orderBy('sending_date', 'asc')
             .limit(count)
             .select('*');
-
-        return mailings.length ? mailings : [];
+        return mailings.length ? mailings : null;
     } catch (err) {
         throw new Error(`Failed to retrieve upcoming mailings: ${err.message}`);
     }
@@ -266,7 +264,7 @@ async function getFilteredMessages({ page = 1, limit = 10, type_id, search_strin
         const totalPages = Math.ceil(total.total / limit);
 
         return {
-            data: messages.length ? messages : [],
+            data: messages.length ? messages : null,
             pagination: {
                 total: total.total,
                 page,

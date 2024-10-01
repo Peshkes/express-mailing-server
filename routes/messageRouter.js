@@ -116,6 +116,15 @@ router.delete('/sample/:id', async (req, res) => {
     }
 });
 
+router.get('/sample/all', async (req, res) => {
+    try {
+        const samples = await getSamples();
+        res.status(200).json(samples);
+    } catch (err) {
+        res.status(500).json({ status: 'Failed to retrieve samples: ' + err.message });
+    }
+});
+
 router.get('/sample/:id', async (req, res) => {
     const { id } = req.params;
     try {
@@ -126,14 +135,7 @@ router.get('/sample/:id', async (req, res) => {
     }
 });
 
-router.get('/samples', async (req, res) => {
-    try {
-        const samples = await getSamples();
-        res.status(200).json(samples);
-    } catch (err) {
-        res.status(500).json({ status: 'Failed to retrieve samples: ' + err.message });
-    }
-});
+
 
 // Маршруты для работы с конкретными сообщениями (обновление, удаление)
 router.put('/:id', checkMessageExists, validateMessageData, async (req, res) => {

@@ -39,7 +39,7 @@ async function addClient(phone_number, name, type_id, check_in_date, check_out_d
 async function getClients() {
     try {
         const clients = await db('clients').select('*');
-        return clients.length ? clients : [];
+        return clients.length ? clients : null;
     } catch (err) {
         throw new Error(`Failed to retrieve clients: ${err.message}`);
     }
@@ -71,7 +71,7 @@ async function getClientById(clientId) {
 async function getClientsByTypeId(typeId) {
     try {
         const clients = await db('clients').where({type_id: typeId});
-        return clients.length ? clients : [];
+        return clients.length ? clients : null;
     } catch (err) {
         throw new Error(`Failed to retrieve clients: ${err.message}`);
     }
@@ -218,26 +218,15 @@ async function getClientsWithPaginationAndFilter({page, limit, typeId}) {
 
         const totalPages = Math.ceil(total.total / limit);
 
-        if (clients.length === 0) {
-            return {
-                data: [],
-                pagination: {
-                    total: 0,
-                    page,
-                    totalPages: 0,
-                    limit,
-                },
-            };
-        } else
-            return {
-                data: clients,
-                pagination: {
-                    total: total.total,
-                    page,
-                    totalPages,
-                    limit,
-                },
-            };
+        return {
+            data: clients.length ? clients : null,
+            pagination: {
+                total: total.total,
+                page,
+                totalPages,
+                limit,
+            }
+        };
     } catch (err) {
         throw new Error(`Failed to retrieve clients: ${err.message}`);
     }
@@ -282,13 +271,14 @@ async function searchClients(string, searchFields) {
  * @throws {Error} - В случае ошибки при получении клиентов.
  */
 async function getLastAddedClients(count) {
+
     try {
         const clients = await db('clients')
             .orderBy('id', 'desc')
             .limit(count)
             .select('*');
 
-        return clients || [];
+        return clients.length ? clients : null;
     } catch (err) {
         throw new Error(`Failed to retrieve clients: ${err.message}`);
     }
@@ -302,11 +292,11 @@ async function getLastAddedClients(count) {
 async function getClientsWithTelegramError() {
     try {
         const clients = await db('clients')
-            .where('messenger_id', 2)
-            .where('chat_id', 0)
+            .where('messanger_id', 2)
+            .where('chat_id', null)
             .select('*');
 
-        return clients || [];
+        return clients.length ? clients : null;
     } catch (err) {
         throw new Error(`Failed to retrieve clients: ${err.message}`);
     }
@@ -323,7 +313,7 @@ async function getClientsWithoutTypes() {
             .whereNull('type_id')
             .select('*');
 
-        return clients || [];
+        return clients.length ? clients : null;
     } catch (err) {
         throw new Error(`Failed to retrieve clients: ${err.message}`);
     }
@@ -345,10 +335,10 @@ async function getFilteredClients({page, limit, type_id, search_type, search_str
         let query = db('clients');
 
         if (type_id) query = query.where('type_id', type_id);
-        if (tg_error) query = query.where('messenger_id', 2).where('chat_id', null);
+        if (tg_error) query = query.where('messanger_id', 2).where('chat_id', null);
         if (search_type && search_string) query = query.where(search_type, 'like', `%${search_string}%`);
-
-        query = query.offset((page - 1) * limit).limit(limit);
+        const offset = (page - 1) * limit;
+        query = query.offset(offset).limit(limit);
 
         const [clients, total] = await Promise.all([
             query.clone().select('*').limit(limit).offset(offset),
@@ -356,27 +346,15 @@ async function getFilteredClients({page, limit, type_id, search_type, search_str
         ]);
 
         const totalPages = Math.ceil(total.total / limit);
-
-        if (clients.length === 0) {
-            return {
-                data: [],
-                pagination: {
-                    total: 0,
-                    page,
-                    totalPages: 0,
-                    limit,
-                },
-            };
-        } else
-            return {
-                data: clients,
-                pagination: {
-                    total: total.total,
-                    page,
-                    totalPages,
-                    limit,
-                },
-            };
+        return {
+            data: clients.length ? clients : null,
+            pagination: {
+                total: total.total,
+                page,
+                totalPages,
+                limit,
+            },
+        };
     } catch (err) {
         throw new Error(`Failed to retrieve clients: ${err.message}`);
     }
