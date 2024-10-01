@@ -48,7 +48,8 @@ async function getSample(id) {
  */
 async function getSamples() {
     try {
-        return await db('samples').select('*');
+        const samples = await db('samples').select('*');
+        return samples.length ? samples : []; // Возвращаем пустой массив, если шаблонов нет
     } catch (err) {
         throw new Error(`Failed to retrieve samples: ${err.message}`);
     }

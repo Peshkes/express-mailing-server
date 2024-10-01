@@ -34,10 +34,12 @@ async function addClient(phone_number, name, type_id, check_in_date, check_out_d
 /**
  * Получает список всех клиентов из базы данных.
  * @returns {Promise<Array>} - Массив клиентов.
+ * @throws {Error} - В случае ошибки при получении данных.
  */
 async function getClients() {
     try {
-        return await db('clients').select('*');
+        const clients = await db('clients').select('*');
+        return clients.length ? clients : [];
     } catch (err) {
         throw new Error(`Failed to retrieve clients: ${err.message}`);
     }
@@ -64,11 +66,12 @@ async function getClientById(clientId) {
  * Получает клиентов по ID типа из базы данных.
  * @param {number} typeId - ID типа.
  * @returns {Promise<Array>} - Массив клиентов.
+ * @throws {Error} - В случае ошибки при получении данных.
  */
 async function getClientsByTypeId(typeId) {
     try {
-        const clients = await db('clients').where({ type_id: typeId });
-        return clients || [];
+        const clients = await db('clients').where({type_id: typeId});
+        return clients.length ? clients : [];
     } catch (err) {
         throw new Error(`Failed to retrieve clients: ${err.message}`);
     }
@@ -117,14 +120,14 @@ async function updateClient(id, phone_number, name, type_id, check_in_date, chec
  */
 async function updateClientsMessenger(id, messenger_id) {
     try {
-        const oldClient = await db('clients').where({ id }).first();
+        const oldClient = await db('clients').where({id}).first();
         if (!oldClient) {
             throw new Error('Client not found');
         }
 
         const [updatedId] = await db('clients')
-            .where({ id })
-            .update({ messenger_id })
+            .where({id})
+            .update({messenger_id})
             .returning('id');
 
         if (!updatedId) {
@@ -145,14 +148,14 @@ async function updateClientsMessenger(id, messenger_id) {
  */
 async function updateClientsType(id, type_id) {
     try {
-        const oldClient = await db('clients').where({ id }).first();
+        const oldClient = await db('clients').where({id}).first();
         if (!oldClient) {
             throw new Error('Client not found');
         }
 
         const [updatedId] = await db('clients')
-            .where({ id })
-            .update({ type_id })
+            .where({id})
+            .update({type_id})
             .returning('id');
 
         if (!updatedId) {
@@ -215,15 +218,26 @@ async function getClientsWithPaginationAndFilter({page, limit, typeId}) {
 
         const totalPages = Math.ceil(total.total / limit);
 
-        return {
-            data: clients,
-            pagination: {
-                total: total.total,
-                page,
-                totalPages,
-                limit,
-            },
-        };
+        if (clients.length === 0) {
+            return {
+                data: [],
+                pagination: {
+                    total: 0,
+                    page,
+                    totalPages: 0,
+                    limit,
+                },
+            };
+        } else
+            return {
+                data: clients,
+                pagination: {
+                    total: total.total,
+                    page,
+                    totalPages,
+                    limit,
+                },
+            };
     } catch (err) {
         throw new Error(`Failed to retrieve clients: ${err.message}`);
     }
@@ -253,7 +267,8 @@ async function searchClients(string, searchFields) {
             throw new Error('Некорректные поля поиска');
         }
 
-        return await query.select('*');
+        const results = await query.select('*');
+        return results || [];
     } catch (error) {
         console.error('Ошибка при поиске клиентов:', error);
         throw error;
@@ -268,10 +283,12 @@ async function searchClients(string, searchFields) {
  */
 async function getLastAddedClients(count) {
     try {
-        return await db('clients')
+        const clients = await db('clients')
             .orderBy('id', 'desc')
             .limit(count)
             .select('*');
+
+        return clients || [];
     } catch (err) {
         throw new Error(`Failed to retrieve clients: ${err.message}`);
     }
@@ -284,10 +301,12 @@ async function getLastAddedClients(count) {
  */
 async function getClientsWithTelegramError() {
     try {
-        return await db('clients')
+        const clients = await db('clients')
             .where('messenger_id', 2)
             .where('chat_id', 0)
             .select('*');
+
+        return clients || [];
     } catch (err) {
         throw new Error(`Failed to retrieve clients: ${err.message}`);
     }
@@ -300,9 +319,11 @@ async function getClientsWithTelegramError() {
  */
 async function getClientsWithoutTypes() {
     try {
-        return await db('clients')
-            .whereNull('type')
+        const clients = await db('clients')
+            .whereNull('type_id')
             .select('*');
+
+        return clients || [];
     } catch (err) {
         throw new Error(`Failed to retrieve clients: ${err.message}`);
     }
@@ -319,7 +340,7 @@ async function getClientsWithoutTypes() {
  * @param {boolean} [params.tg_error] - Флаг ошибки в Telegram (опционально).
  * @returns {Promise<Object>} - Объект с массивом клиентов и общим количеством страниц.
  */
-async function getFilteredClients({ page, limit, type_id, search_type, search_string, tg_error }){
+async function getFilteredClients({page, limit, type_id, search_type, search_string, tg_error}) {
     try {
         let query = db('clients');
 
@@ -336,15 +357,26 @@ async function getFilteredClients({ page, limit, type_id, search_type, search_st
 
         const totalPages = Math.ceil(total.total / limit);
 
-        return {
-            data: clients,
-            pagination: {
-                total: total.total,
-                page,
-                totalPages,
-                limit,
-            },
-        };
+        if (clients.length === 0) {
+            return {
+                data: [],
+                pagination: {
+                    total: 0,
+                    page,
+                    totalPages: 0,
+                    limit,
+                },
+            };
+        } else
+            return {
+                data: clients,
+                pagination: {
+                    total: total.total,
+                    page,
+                    totalPages,
+                    limit,
+                },
+            };
     } catch (err) {
         throw new Error(`Failed to retrieve clients: ${err.message}`);
     }
@@ -352,7 +384,18 @@ async function getFilteredClients({ page, limit, type_id, search_type, search_st
 
 
 module.exports = {
-    addClient, getClients, getClientById, updateClient, deleteClient, getClientsByTypeId,
-    updateClientsMessenger, getClientsWithPaginationAndFilter,
-    searchClients, getLastAddedClients, getClientsWithTelegramError, getClientsWithoutTypes, getFilteredClients
+    addClient,
+    getClients,
+    getClientById,
+    updateClient,
+    deleteClient,
+    getClientsByTypeId,
+    updateClientsMessenger,
+    getClientsWithPaginationAndFilter,
+    searchClients,
+    getLastAddedClients,
+    getClientsWithTelegramError,
+    getClientsWithoutTypes,
+    getFilteredClients,
+    updateClientsType
 };

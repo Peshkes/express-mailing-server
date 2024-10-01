@@ -4,7 +4,7 @@ exports.seed = async function (knex) {
 
     await knex('client_types').insert([
         {type_name: 'Взрослые'},
-        {type_name: 'Семьи с детьми'}
+        {type_name: 'С детьми'}
     ]);
 
     await knex('messengers').insert([

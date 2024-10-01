@@ -32,7 +32,8 @@ async function addMessage(message_text, recipient_type_id = null, media_path, se
  */
 async function getMessages() {
     try {
-        return await db('messages').select('*');
+        const messages = await db('messages').select('*');
+        return messages.length ? messages : [];
     } catch (err) {
         throw new Error(`Failed to retrieve messages: ${err.message}`);
     }
@@ -136,6 +137,18 @@ async function getMessagesWithPaginationAndFilter({ page, limit, type }) {
 
         const totalPages = Math.ceil(total.total / limit);
 
+        if (messages.length === 0) {
+            return {
+                data: [],
+                pagination: {
+                    total: 0,
+                    page,
+                    totalPages: 0,
+                    limit,
+                },
+            };
+        }
+
         return {
             data: messages,
             pagination: {
@@ -171,7 +184,9 @@ async function searchMessages(text, date_from, date_to) {
         if (date_to)
             query = query.where('sent_date', '<=', date_to);
 
-        return await query.select('*');
+        const messages = await query.select('*');
+
+        return messages.length ? messages : [];
     } catch (err) {
         throw new Error(`Failed to search messages: ${err.message}`);
     }
@@ -184,9 +199,15 @@ async function searchMessages(text, date_from, date_to) {
  */
 async function getMessagesByRecipientType(recipient_type_id) {
     try {
-        return await db('messages')
+        if (typeof recipient_type_id !== 'number') {
+            throw new Error('Invalid recipient_type_id');
+        }
+
+        const messages = await db('messages')
             .where({ recipient_type_id })
             .select('*');
+
+        return messages.length ? messages : [];
     } catch (err) {
         throw new Error(`Failed to retrieve messages by recipient type: ${err.message}`);
     }
@@ -200,13 +221,15 @@ async function getMessagesByRecipientType(recipient_type_id) {
  */
 async function getUpcomingMailings(count) {
     try {
-        const now = Date.now(); // Получаем текущее время в формате long timestamp
+        const now = new Date().getTime();
 
-        return await db('messages')
+        const mailings = await db('messages')
             .where('sending_date', '>', now)
             .orderBy('sending_date', 'asc')
             .limit(count)
             .select('*');
+
+        return mailings.length ? mailings : [];
     } catch (err) {
         throw new Error(`Failed to retrieve upcoming mailings: ${err.message}`);
     }
@@ -219,17 +242,16 @@ async function getUpcomingMailings(count) {
  * @param {number} params.limit - Количество элементов на странице.
  * @param {number} [params.type_id] - Тип получателя (опционально).
  * @param {string} [params.search_string] - Строка поиска по тексту сообщения (опционально).
- * @param {long} [params.date_from] - Дата начала поиска (опционально, timestamp).
- * @param {long} [params.date_to] - Дата окончания поиска (опционально, timestamp).
+ * @param {number} [params.date_from] - Дата начала поиска (опционально, timestamp).
+ * @param {number} [params.date_to] - Дата окончания поиска (опционально, timestamp).
  * @returns {Promise<Object>} - Объект с массивом сообщений и общим количеством страниц.
  */
-async function getFilteredMessages({ page, limit, type_id, search_string, date_from, date_to }) {
+async function getFilteredMessages({ page = 1, limit = 10, type_id, search_string, date_from, date_to }) {
     try {
         let query = db('messages');
 
         if (type_id) query = query.where('recipient_type_id', type_id);
         if (search_string) query = query.where('message_text', 'like', `%${search_string}%`);
-
         if (date_from) query = query.where('sending_date', '>=', date_from);
         if (date_to) query = query.where('sending_date', '<=', date_to);
 
@@ -244,7 +266,7 @@ async function getFilteredMessages({ page, limit, type_id, search_string, date_f
         const totalPages = Math.ceil(total.total / limit);
 
         return {
-            data: messages,
+            data: messages.length ? messages : [],
             pagination: {
                 total: total.total,
                 page,
