@@ -153,6 +153,7 @@ router.delete('/:id', checkMessageExists, async (req, res) => {
     const { id } = req.params;
     try {
         const message = await deleteMessage(id);
+        console.log(message)
         res.status(200).json(message);
     } catch (err) {
         res.status(500).json({ status: 'Failed to delete message: ' + err.message });

@@ -95,16 +95,15 @@ async function updateMessage(id, message_text, recipient_type_id = null, media_p
  */
 async function deleteMessage(id) {
     try {
-        const deletedMessages = await db('messages')
-            .where({ id })
-            .del()
-            .returning('*');
+        const message = await db('messages').where({ id }).first();
 
-        if (deletedMessages.length === 0) {
-            return null;
+        if (!message) {
+            throw new Error(`Message not found`);
         }
 
-        return deletedMessages[0];
+        await db('messages').where({ id }).del();
+
+        return message;
     } catch (err) {
         throw new Error(`Failed to delete message: ${err.message}`);
     }
