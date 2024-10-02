@@ -62,7 +62,7 @@ async function checkClientTypeExists(req, res, next) {
 
 async function checkNameIsNotNull(req, res, next) {
     const { sample_name } = req.body;
-    if (name == null) {
+    if (sample_name == null) {
         return res.status(400).json({ status: 'Name cannot be null' });
     }
     req.validatedMessageData.sample_name = sample_name;

@@ -7,18 +7,18 @@ const db = require("../api/db/dbConfig");
  * @param {number} type_id - ID типа клиента.
  * @param {number} check_in_date - Дата заезда в формате long timestamp.
  * @param {number} check_out_date - Дата выезда в формате long timestamp.
- * @param {number} messenger_id - ID мессенджера.
+ * @param {number} messanger_id - ID мессенджера.
  * @param {number | null} [chat_id] - ID чата в мессенджере.
  * @returns {Promise<Object>} - Объект с ID добавленного клиента.
  */
-async function addClient(phone_number, name, type_id, check_in_date, check_out_date, messenger_id, chat_id = null) {
+async function addClient(phone_number, name, type_id, check_in_date, check_out_date, messanger_id, chat_id = null) {
     try {
         const [result] = await db('clients')
             .insert({
                 phone_number,
                 name,
                 type_id,
-                messenger_id,
+                messanger_id,
                 check_in_date,
                 check_out_date,
                 chat_id

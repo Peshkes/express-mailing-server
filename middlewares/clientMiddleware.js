@@ -23,7 +23,7 @@ async function validateClientData(req, res, next) {
         }
 
         if (messanger_id) {
-            const messangerValidation = await validateMessanger(messanger_id);
+            const messangerValidation = await validateMessenger(messanger_id);
             if (!messangerValidation.valid) {
                 return res.status(400).json({ status: messangerValidation.message });
             }
