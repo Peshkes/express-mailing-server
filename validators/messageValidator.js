@@ -25,7 +25,7 @@ function validateMessageTheme(theme) {
  * @returns {boolean} - Корректность ссылки.
  */
 function validateMediaPath(media_path) {
-    return media_path === undefined || (typeof media_path === 'string' && media_path.trim().length > 0);
+    return media_path == undefined || (typeof media_path === 'string' && media_path.trim().length > 0);
 }
 
 /**

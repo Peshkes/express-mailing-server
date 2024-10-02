@@ -140,7 +140,7 @@ router.get('/sample/:id', async (req, res) => {
 // Маршруты для работы с конкретными сообщениями (обновление, удаление)
 router.put('/:id', checkMessageExists, validateMessageData, async (req, res) => {
     const { id } = req.params;
-    const { message_text, recipient_type_id, media_path, sending_date, theme } = req.validatedData;
+    const { message_text, recipient_type_id, media_path, sending_date, theme } = req.validatedMessageData;
     try {
         const message = await updateMessage(id, message_text, recipient_type_id, media_path, sending_date, theme);
         res.status(200).json({ status: 'Message updated successfully', message });
@@ -174,7 +174,7 @@ router.get('/:id', async (req, res) => {
 });
 
 router.post('/', validateMessageData, async (req, res) => {
-    const { message_text, recipient_type_id, media_path, sending_date, theme } = req.validatedData;
+    const { message_text, recipient_type_id, media_path, sending_date, theme } = req.validatedMessageData;
     try {
         const result = await addMessage(message_text, recipient_type_id, media_path, sending_date, theme);
         res.status(201).json(result.id);
